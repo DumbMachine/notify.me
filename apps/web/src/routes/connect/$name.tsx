@@ -7,6 +7,7 @@ import {
   ShareIcon,
 } from "lucide-react"
 
+import { bindDevice } from "@/lib/session"
 import { Alert, AlertDescription, AlertTitle } from "@workspace/ui/components/alert"
 import { Badge } from "@workspace/ui/components/badge"
 import { Button } from "@workspace/ui/components/button"
@@ -16,7 +17,10 @@ export const Route = createFileRoute("/connect/$name")({
   head: ({ params }) => ({
     meta: [
       { title: `Connect · ${params.name} · notify.me` },
-      { name: "apple-mobile-web-app-title", content: `notify.me/${params.name}` },
+      {
+        name: "apple-mobile-web-app-title",
+        content: `notify.me/${params.name}`,
+      },
     ],
     links: [
       {
@@ -40,15 +44,15 @@ function urlBase64ToUint8Array(base64String: string) {
   return outputArray
 }
 
-function getInstallHint() {
+function getInstallHint(name: string) {
   if (typeof navigator === "undefined") {
     return {
       platform: "unknown" as const,
       title: "Add to Home Screen",
       steps: [
-        "Open this page in your phone browser",
+        "Stay on this connect page",
         "Use Share / menu → Add to Home Screen",
-        "Open notify.me from your home screen",
+        `Confirm the URL is …/connect/${name}, then open the icon and enable notifications`,
       ],
     }
   }
@@ -62,9 +66,10 @@ function getInstallHint() {
       platform: "ios" as const,
       title: "Add to Home Screen (iPhone)",
       steps: [
-        "Tap the Share button in Safari",
-        "Scroll and tap Add to Home Screen",
-        "Open notify.me from your home screen, then enable notifications",
+        "Stay on this page (do not go to the homepage)",
+        "Tap Share → Add to Home Screen",
+        `Check the URL shows /connect/${name}, then Add`,
+        "Open the icon and enable notifications below",
       ],
     }
   }
@@ -74,9 +79,9 @@ function getInstallHint() {
       platform: "android" as const,
       title: "Install app (Android)",
       steps: [
-        "Tap the browser menu (⋮)",
-        "Choose Install app or Add to Home screen",
-        "Open notify.me from your home screen, then enable notifications",
+        "Stay on this connect page",
+        "Tap the browser menu (⋮) → Install app / Add to Home screen",
+        "Open the installed app, then enable notifications",
       ],
     }
   }
@@ -86,7 +91,7 @@ function getInstallHint() {
     title: "Open on your phone",
     steps: [
       "Scan the QR from your dashboard on a phone",
-      "Add this page to your home screen",
+      `Add /connect/${name} to your home screen from that page`,
       "Enable notifications from the installed app",
     ],
   }
@@ -106,7 +111,11 @@ function ConnectPage() {
   } | null>(null)
   const [isStandalone, setIsStandalone] = useState(false)
 
-  const hint = useMemo(() => getInstallHint(), [])
+  const hint = useMemo(() => getInstallHint(name), [name])
+
+  useEffect(() => {
+    bindDevice(name)
+  }, [name])
 
   useEffect(() => {
     const media = window.matchMedia("(display-mode: standalone)")
@@ -209,6 +218,7 @@ function ConnectPage() {
         throw new Error(data.error ?? "Failed to save subscription.")
       }
 
+      bindDevice(name)
       setConnected(true)
       setStep("done")
       setMessage("You're connected. Notifications will appear on this device.")
@@ -258,8 +268,8 @@ function ConnectPage() {
             {name}
           </h1>
           <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-            Save this page to your home screen, then enable notifications so
-            your API can reach this phone.
+            Add <span className="font-medium text-foreground">this</span> page
+            to your home screen (not the homepage), then enable notifications.
           </p>
         </div>
 
@@ -277,6 +287,10 @@ function ConnectPage() {
                 <li key={item}>{item}</li>
               ))}
             </ol>
+            <p className="mt-3 text-xs text-muted-foreground">
+              Expected URL:{" "}
+              <code className="text-foreground">/connect/{name}</code>
+            </p>
             {deferredPrompt ? (
               <Button
                 type="button"
@@ -332,7 +346,9 @@ function ConnectPage() {
         ) : null}
 
         <p className="mt-auto pt-10 text-center text-xs text-muted-foreground">
-          Keep this app installed. Closing the tab is fine after setup.
+          To manage the API later, open notify.me and use{" "}
+          <span className="text-foreground">Open existing</span> with your API
+          key.
         </p>
       </main>
     </div>

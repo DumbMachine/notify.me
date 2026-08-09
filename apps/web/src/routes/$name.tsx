@@ -1,23 +1,19 @@
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useState, type FormEvent } from "react"
 import { createFileRoute, Link } from "@tanstack/react-router"
 import { BellRingIcon, SmartphoneIcon } from "lucide-react"
 
 import { CopyButton } from "@/components/copy-button"
 import { QrCode } from "@/components/qr-code"
+import { loadCreds, saveCreds, type StoredCreds } from "@/lib/session"
 import { Badge } from "@workspace/ui/components/badge"
 import { Button } from "@workspace/ui/components/button"
+import { Input } from "@workspace/ui/components/input"
 import { Separator } from "@workspace/ui/components/separator"
 import { Textarea } from "@workspace/ui/components/textarea"
 
 export const Route = createFileRoute("/$name")({
   component: DashboardPage,
 })
-
-type StoredCreds = {
-  apiKey: string
-  notifyUrl: string
-  connectUrl: string
-}
 
 type ChannelStatus = {
   name: string
@@ -26,14 +22,71 @@ type ChannelStatus = {
   error?: string
 }
 
-function loadCreds(name: string): StoredCreds | null {
-  try {
-    const raw = sessionStorage.getItem(`notify.me:${name}`)
-    if (!raw) return null
-    return JSON.parse(raw) as StoredCreds
-  } catch {
-    return null
+function DashboardLogin({
+  name,
+  onRestored,
+}: {
+  name: string
+  onRestored: (creds: StoredCreds) => void
+}) {
+  const [apiKey, setApiKey] = useState("")
+  const [error, setError] = useState<string | null>(null)
+  const [pending, setPending] = useState(false)
+
+  async function onSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    setPending(true)
+    setError(null)
+    try {
+      const response = await fetch("/api/login", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ name, apiKey }),
+      })
+      const data = (await response.json()) as StoredCreds & { error?: string }
+      if (!response.ok) {
+        setError(data.error ?? "Could not restore this name.")
+        return
+      }
+      const creds = {
+        apiKey: data.apiKey,
+        notifyUrl: data.notifyUrl,
+        connectUrl: data.connectUrl,
+      }
+      saveCreds(name, creds)
+      onRestored(creds)
+    } catch {
+      setError("Something went wrong. Try again.")
+    } finally {
+      setPending(false)
+    }
   }
+
+  return (
+    <form onSubmit={onSubmit} className="space-y-3 border border-foreground/10 p-4">
+      <p className="text-sm text-muted-foreground">
+        Enter the API key for <span className="font-medium text-foreground">{name}</span>{" "}
+        to restore this dashboard.
+      </p>
+      <Input
+        type="password"
+        value={apiKey}
+        onChange={(e) => setApiKey(e.target.value.trim())}
+        placeholder="API key"
+        className="h-9"
+        required
+        minLength={16}
+      />
+      <Button type="submit" disabled={pending || apiKey.length < 16}>
+        {pending ? "Opening…" : "Unlock dashboard"}
+      </Button>
+      {error ? (
+        <p className="text-sm text-destructive" role="alert">
+          {error}
+        </p>
+      ) : null}
+    </form>
+  )
 }
 
 function DashboardPage() {
@@ -144,8 +197,9 @@ function DashboardPage() {
             {name}
           </h1>
           <p className="mt-3 max-w-lg text-sm leading-relaxed text-muted-foreground">
-            Scan the QR code with your phone, install notify.me to the home
-            screen, and allow notifications. Then POST to your API.
+            Scan the QR on your phone and add{" "}
+            <span className="font-medium text-foreground">/connect/{name}</span>{" "}
+            to the home screen (not the homepage), then allow notifications.
           </p>
 
           <div className="mt-8 space-y-5">
@@ -173,15 +227,15 @@ function DashboardPage() {
                   {creds.apiKey}
                 </code>
                 <p className="mt-2 text-xs text-muted-foreground">
-                  Shown only in this browser session. Store it somewhere safe.
+                  Saved on this device. Use{" "}
+                  <Link to="/" className="underline-offset-4 hover:underline">
+                    Open existing
+                  </Link>{" "}
+                  with this key if you switch browsers.
                 </p>
               </div>
             ) : (
-              <p className="text-sm text-amber-700 dark:text-amber-400">
-                API key is not in this session. If you just claimed this name on
-                another device, reclaim it after a server restart, or keep this
-                tab open after claiming.
-              </p>
+              <DashboardLogin name={name} onRestored={setCreds} />
             )}
 
             <div>

@@ -79,6 +79,22 @@ export function clearSubscription(rawName: string): void {
   if (channel) channel.subscription = null
 }
 
+export function authenticateChannel(
+  rawName: string,
+  apiKey: string
+):
+  | { ok: true; channel: Channel }
+  | { ok: false; error: string; status: number } {
+  const channel = getChannel(rawName)
+  if (!channel) {
+    return { ok: false, error: "Channel not found.", status: 404 }
+  }
+  if (!apiKey || apiKey !== channel.apiKey) {
+    return { ok: false, error: "Invalid name or API key.", status: 401 }
+  }
+  return { ok: true, channel }
+}
+
 export function toPublicChannel(channel: Channel) {
   return {
     name: channel.name,

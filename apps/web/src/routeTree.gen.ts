@@ -14,6 +14,7 @@ import { Route as NameRouteImport } from './routes/$name'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ConnectNameRouteImport } from './routes/connect/$name'
 import { Route as ApiVapidPublicKeyRouteImport } from './routes/api/vapid-public-key'
+import { Route as ApiLoginRouteImport } from './routes/api/login'
 import { Route as ApiClaimRouteImport } from './routes/api/claim'
 import { Route as ApiNotifyNameRouteImport } from './routes/api/notify/$name'
 import { Route as ApiChannelNameRouteImport } from './routes/api/channel/$name'
@@ -44,6 +45,11 @@ const ApiVapidPublicKeyRoute = ApiVapidPublicKeyRouteImport.update({
   path: '/api/vapid-public-key',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiLoginRoute = ApiLoginRouteImport.update({
+  id: '/api/login',
+  path: '/api/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiClaimRoute = ApiClaimRouteImport.update({
   id: '/api/claim',
   path: '/api/claim',
@@ -70,6 +76,7 @@ export interface FileRoutesByFullPath {
   '/$name': typeof NameRoute
   '/manifest.webmanifest': typeof ManifestDotwebmanifestRoute
   '/api/claim': typeof ApiClaimRoute
+  '/api/login': typeof ApiLoginRoute
   '/api/vapid-public-key': typeof ApiVapidPublicKeyRoute
   '/connect/$name': typeof ConnectNameRoute
   '/api/channel/$name': typeof ApiChannelNameRouteWithChildren
@@ -81,6 +88,7 @@ export interface FileRoutesByTo {
   '/$name': typeof NameRoute
   '/manifest.webmanifest': typeof ManifestDotwebmanifestRoute
   '/api/claim': typeof ApiClaimRoute
+  '/api/login': typeof ApiLoginRoute
   '/api/vapid-public-key': typeof ApiVapidPublicKeyRoute
   '/connect/$name': typeof ConnectNameRoute
   '/api/channel/$name': typeof ApiChannelNameRouteWithChildren
@@ -93,6 +101,7 @@ export interface FileRoutesById {
   '/$name': typeof NameRoute
   '/manifest.webmanifest': typeof ManifestDotwebmanifestRoute
   '/api/claim': typeof ApiClaimRoute
+  '/api/login': typeof ApiLoginRoute
   '/api/vapid-public-key': typeof ApiVapidPublicKeyRoute
   '/connect/$name': typeof ConnectNameRoute
   '/api/channel/$name': typeof ApiChannelNameRouteWithChildren
@@ -106,6 +115,7 @@ export interface FileRouteTypes {
     | '/$name'
     | '/manifest.webmanifest'
     | '/api/claim'
+    | '/api/login'
     | '/api/vapid-public-key'
     | '/connect/$name'
     | '/api/channel/$name'
@@ -117,6 +127,7 @@ export interface FileRouteTypes {
     | '/$name'
     | '/manifest.webmanifest'
     | '/api/claim'
+    | '/api/login'
     | '/api/vapid-public-key'
     | '/connect/$name'
     | '/api/channel/$name'
@@ -128,6 +139,7 @@ export interface FileRouteTypes {
     | '/$name'
     | '/manifest.webmanifest'
     | '/api/claim'
+    | '/api/login'
     | '/api/vapid-public-key'
     | '/connect/$name'
     | '/api/channel/$name'
@@ -140,6 +152,7 @@ export interface RootRouteChildren {
   NameRoute: typeof NameRoute
   ManifestDotwebmanifestRoute: typeof ManifestDotwebmanifestRoute
   ApiClaimRoute: typeof ApiClaimRoute
+  ApiLoginRoute: typeof ApiLoginRoute
   ApiVapidPublicKeyRoute: typeof ApiVapidPublicKeyRoute
   ConnectNameRoute: typeof ConnectNameRoute
   ApiChannelNameRoute: typeof ApiChannelNameRouteWithChildren
@@ -181,6 +194,13 @@ declare module '@tanstack/react-router' {
       path: '/api/vapid-public-key'
       fullPath: '/api/vapid-public-key'
       preLoaderRoute: typeof ApiVapidPublicKeyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/login': {
+      id: '/api/login'
+      path: '/api/login'
+      fullPath: '/api/login'
+      preLoaderRoute: typeof ApiLoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/claim': {
@@ -231,6 +251,7 @@ const rootRouteChildren: RootRouteChildren = {
   NameRoute: NameRoute,
   ManifestDotwebmanifestRoute: ManifestDotwebmanifestRoute,
   ApiClaimRoute: ApiClaimRoute,
+  ApiLoginRoute: ApiLoginRoute,
   ApiVapidPublicKeyRoute: ApiVapidPublicKeyRoute,
   ConnectNameRoute: ConnectNameRoute,
   ApiChannelNameRoute: ApiChannelNameRouteWithChildren,

@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router"
 
-import { getChannel, normalizeName } from "@/lib/store"
+import { normalizeName } from "@/lib/store"
 
 export const Route = createFileRoute("/manifest.webmanifest")({
   server: {
@@ -9,17 +9,19 @@ export const Route = createFileRoute("/manifest.webmanifest")({
         const url = new URL(request.url)
         const rawName = url.searchParams.get("name")
         const name = rawName ? normalizeName(rawName) : null
-        const channel = name ? getChannel(name) : undefined
+        const hasName = Boolean(name && name.length >= 3)
 
-        const startUrl = channel ? `/connect/${channel.name}` : "/"
-        const appName = channel ? `notify.me/${channel.name}` : "notify.me"
+        // Always bind install to /connect/:name when a name is present.
+        // Do not require the in-memory channel — serverless instances may differ.
+        const startUrl = hasName ? `/connect/${name}` : "/"
+        const appName = hasName ? `notify.me/${name}` : "notify.me"
 
         const manifest = {
-          id: startUrl,
+          id: hasName ? `/connect/${name}` : "/",
           name: appName,
-          short_name: channel ? channel.name : "notify.me",
-          description: channel
-            ? `Push notifications for ${channel.name}`
+          short_name: hasName ? name : "notify.me",
+          description: hasName
+            ? `Push notifications for ${name}`
             : "Claim a name and push notifications to your phone.",
           start_url: startUrl,
           scope: "/",
