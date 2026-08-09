@@ -15,7 +15,7 @@ export const Route = createFileRoute("/api/notify/$name")({
   server: {
     handlers: {
       POST: async ({ request, params }) => {
-        const channel = getChannel(params.name)
+        const channel = await getChannel(params.name)
         if (!channel) {
           return Response.json({ error: "Channel not found." }, { status: 404 })
         }

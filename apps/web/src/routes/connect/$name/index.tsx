@@ -8,11 +8,22 @@ import { Alert, AlertDescription, AlertTitle } from "@workspace/ui/components/al
 import { Badge } from "@workspace/ui/components/badge"
 import { Button } from "@workspace/ui/components/button"
 
-export const Route = createFileRoute("/connect/$name")({
+export const Route = createFileRoute("/connect/$name/")({
   component: ConnectPage,
+  validateSearch: (search: Record<string, unknown>): { k?: string } => ({
+    k: typeof search.k === "string" ? search.k : undefined,
+  }),
   head: ({ params }) => ({
     meta: [
       { title: `Connect · ${params.name} · notify.me` },
+      {
+        name: "apple-mobile-web-app-capable",
+        content: "yes",
+      },
+      {
+        name: "mobile-web-app-capable",
+        content: "yes",
+      },
       {
         name: "apple-mobile-web-app-title",
         content: `notify.me/${params.name}`,
@@ -21,7 +32,7 @@ export const Route = createFileRoute("/connect/$name")({
     links: [
       {
         rel: "manifest",
-        href: `/manifest.webmanifest?name=${encodeURIComponent(params.name)}`,
+        href: `/connect/${encodeURIComponent(params.name)}/manifest.webmanifest`,
       },
     ],
   }),
@@ -51,6 +62,7 @@ function isStandaloneApp() {
 
 function ConnectPage() {
   const { name } = Route.useParams()
+  const { k: apiKey } = Route.useSearch()
   const [channelOk, setChannelOk] = useState<boolean | null>(null)
   const [connected, setConnected] = useState(false)
   const [permission, setPermission] = useState<NotificationPermission>(
@@ -76,8 +88,28 @@ function ConnectPage() {
 
   useEffect(() => {
     let cancelled = false
-    void fetch(`/api/channel/${name}`)
-      .then(async (response) => {
+
+    async function boot() {
+      try {
+        if (apiKey) {
+          const ensureResponse = await fetch(`/api/channel/${name}/ensure`, {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({ apiKey }),
+          })
+          if (!ensureResponse.ok) {
+            if (!cancelled) setChannelOk(false)
+            return
+          }
+          const ensured = (await ensureResponse.json()) as { connected: boolean }
+          if (!cancelled) {
+            setChannelOk(true)
+            setConnected(ensured.connected)
+          }
+          return
+        }
+
+        const response = await fetch(`/api/channel/${name}`)
         if (!response.ok) {
           if (!cancelled) setChannelOk(false)
           return
@@ -87,14 +119,16 @@ function ConnectPage() {
           setChannelOk(true)
           setConnected(data.connected)
         }
-      })
-      .catch(() => {
+      } catch {
         if (!cancelled) setChannelOk(false)
-      })
+      }
+    }
+
+    void boot()
     return () => {
       cancelled = true
     }
-  }, [name])
+  }, [name, apiKey])
 
   async function enableNotifications() {
     setStep("working")
@@ -111,6 +145,18 @@ function ConnectPage() {
         throw new Error(
           "Notifications require HTTPS (or localhost). Open this page over a secure origin."
         )
+      }
+
+      if (apiKey) {
+        const ensureResponse = await fetch(`/api/channel/${name}/ensure`, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ apiKey }),
+        })
+        if (!ensureResponse.ok) {
+          const data = (await ensureResponse.json()) as { error?: string }
+          throw new Error(data.error ?? "Could not open this channel.")
+        }
       }
 
       const registration = await navigator.serviceWorker.register("/sw.js", {
@@ -141,7 +187,10 @@ function ConnectPage() {
       const saveResponse = await fetch(`/api/channel/${name}/subscribe`, {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify(subscription.toJSON()),
+        body: JSON.stringify({
+          apiKey,
+          subscription: subscription.toJSON(),
+        }),
       })
 
       if (!saveResponse.ok) {
@@ -152,7 +201,9 @@ function ConnectPage() {
       bindDevice(name)
       setConnected(true)
       setStep("done")
-      setMessage("You're connected. Notifications will appear on this device.")
+      setMessage(
+        "You're connected. Your dashboard should show Phone connected within a few seconds."
+      )
     } catch (error) {
       setStep("error")
       setMessage(error instanceof Error ? error.message : "Something went wrong.")
@@ -167,10 +218,12 @@ function ConnectPage() {
         </h1>
         <p className="text-sm text-muted-foreground">
           <span className="font-medium text-foreground">{name}</span> is not
-          claimed on this server yet.
+          available. Open the QR from your dashboard (it includes a key), or use{" "}
+          <span className="font-medium text-foreground">Open existing</span> on
+          the homepage.
         </p>
         <Button nativeButton={false} render={<Link to="/" />}>
-          Claim a name
+          Back to notify.me
         </Button>
       </main>
     )

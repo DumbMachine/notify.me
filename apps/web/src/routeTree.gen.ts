@@ -12,13 +12,15 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as ManifestDotwebmanifestRouteImport } from './routes/manifest[.]webmanifest'
 import { Route as NameRouteImport } from './routes/$name'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as ConnectNameRouteImport } from './routes/connect/$name'
 import { Route as ApiVapidPublicKeyRouteImport } from './routes/api/vapid-public-key'
 import { Route as ApiLoginRouteImport } from './routes/api/login'
 import { Route as ApiClaimRouteImport } from './routes/api/claim'
+import { Route as ConnectNameIndexRouteImport } from './routes/connect/$name/index'
+import { Route as ConnectNameManifestDotwebmanifestRouteImport } from './routes/connect/$name/manifest[.]webmanifest'
 import { Route as ApiNotifyNameRouteImport } from './routes/api/notify/$name'
 import { Route as ApiChannelNameRouteImport } from './routes/api/channel/$name'
 import { Route as ApiChannelNameSubscribeRouteImport } from './routes/api/channel/$name/subscribe'
+import { Route as ApiChannelNameEnsureRouteImport } from './routes/api/channel/$name/ensure'
 
 const ManifestDotwebmanifestRoute = ManifestDotwebmanifestRouteImport.update({
   id: '/manifest.webmanifest',
@@ -33,11 +35,6 @@ const NameRoute = NameRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ConnectNameRoute = ConnectNameRouteImport.update({
-  id: '/connect/$name',
-  path: '/connect/$name',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiVapidPublicKeyRoute = ApiVapidPublicKeyRouteImport.update({
@@ -55,6 +52,17 @@ const ApiClaimRoute = ApiClaimRouteImport.update({
   path: '/api/claim',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ConnectNameIndexRoute = ConnectNameIndexRouteImport.update({
+  id: '/connect/$name/',
+  path: '/connect/$name/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConnectNameManifestDotwebmanifestRoute =
+  ConnectNameManifestDotwebmanifestRouteImport.update({
+    id: '/connect/$name/manifest.webmanifest',
+    path: '/connect/$name/manifest.webmanifest',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiNotifyNameRoute = ApiNotifyNameRouteImport.update({
   id: '/api/notify/$name',
   path: '/api/notify/$name',
@@ -70,6 +78,11 @@ const ApiChannelNameSubscribeRoute = ApiChannelNameSubscribeRouteImport.update({
   path: '/subscribe',
   getParentRoute: () => ApiChannelNameRoute,
 } as any)
+const ApiChannelNameEnsureRoute = ApiChannelNameEnsureRouteImport.update({
+  id: '/ensure',
+  path: '/ensure',
+  getParentRoute: () => ApiChannelNameRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -78,9 +91,11 @@ export interface FileRoutesByFullPath {
   '/api/claim': typeof ApiClaimRoute
   '/api/login': typeof ApiLoginRoute
   '/api/vapid-public-key': typeof ApiVapidPublicKeyRoute
-  '/connect/$name': typeof ConnectNameRoute
   '/api/channel/$name': typeof ApiChannelNameRouteWithChildren
   '/api/notify/$name': typeof ApiNotifyNameRoute
+  '/connect/$name/manifest.webmanifest': typeof ConnectNameManifestDotwebmanifestRoute
+  '/connect/$name/': typeof ConnectNameIndexRoute
+  '/api/channel/$name/ensure': typeof ApiChannelNameEnsureRoute
   '/api/channel/$name/subscribe': typeof ApiChannelNameSubscribeRoute
 }
 export interface FileRoutesByTo {
@@ -90,9 +105,11 @@ export interface FileRoutesByTo {
   '/api/claim': typeof ApiClaimRoute
   '/api/login': typeof ApiLoginRoute
   '/api/vapid-public-key': typeof ApiVapidPublicKeyRoute
-  '/connect/$name': typeof ConnectNameRoute
   '/api/channel/$name': typeof ApiChannelNameRouteWithChildren
   '/api/notify/$name': typeof ApiNotifyNameRoute
+  '/connect/$name/manifest.webmanifest': typeof ConnectNameManifestDotwebmanifestRoute
+  '/connect/$name': typeof ConnectNameIndexRoute
+  '/api/channel/$name/ensure': typeof ApiChannelNameEnsureRoute
   '/api/channel/$name/subscribe': typeof ApiChannelNameSubscribeRoute
 }
 export interface FileRoutesById {
@@ -103,9 +120,11 @@ export interface FileRoutesById {
   '/api/claim': typeof ApiClaimRoute
   '/api/login': typeof ApiLoginRoute
   '/api/vapid-public-key': typeof ApiVapidPublicKeyRoute
-  '/connect/$name': typeof ConnectNameRoute
   '/api/channel/$name': typeof ApiChannelNameRouteWithChildren
   '/api/notify/$name': typeof ApiNotifyNameRoute
+  '/connect/$name/manifest.webmanifest': typeof ConnectNameManifestDotwebmanifestRoute
+  '/connect/$name/': typeof ConnectNameIndexRoute
+  '/api/channel/$name/ensure': typeof ApiChannelNameEnsureRoute
   '/api/channel/$name/subscribe': typeof ApiChannelNameSubscribeRoute
 }
 export interface FileRouteTypes {
@@ -117,9 +136,11 @@ export interface FileRouteTypes {
     | '/api/claim'
     | '/api/login'
     | '/api/vapid-public-key'
-    | '/connect/$name'
     | '/api/channel/$name'
     | '/api/notify/$name'
+    | '/connect/$name/manifest.webmanifest'
+    | '/connect/$name/'
+    | '/api/channel/$name/ensure'
     | '/api/channel/$name/subscribe'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -129,9 +150,11 @@ export interface FileRouteTypes {
     | '/api/claim'
     | '/api/login'
     | '/api/vapid-public-key'
-    | '/connect/$name'
     | '/api/channel/$name'
     | '/api/notify/$name'
+    | '/connect/$name/manifest.webmanifest'
+    | '/connect/$name'
+    | '/api/channel/$name/ensure'
     | '/api/channel/$name/subscribe'
   id:
     | '__root__'
@@ -141,9 +164,11 @@ export interface FileRouteTypes {
     | '/api/claim'
     | '/api/login'
     | '/api/vapid-public-key'
-    | '/connect/$name'
     | '/api/channel/$name'
     | '/api/notify/$name'
+    | '/connect/$name/manifest.webmanifest'
+    | '/connect/$name/'
+    | '/api/channel/$name/ensure'
     | '/api/channel/$name/subscribe'
   fileRoutesById: FileRoutesById
 }
@@ -154,9 +179,10 @@ export interface RootRouteChildren {
   ApiClaimRoute: typeof ApiClaimRoute
   ApiLoginRoute: typeof ApiLoginRoute
   ApiVapidPublicKeyRoute: typeof ApiVapidPublicKeyRoute
-  ConnectNameRoute: typeof ConnectNameRoute
   ApiChannelNameRoute: typeof ApiChannelNameRouteWithChildren
   ApiNotifyNameRoute: typeof ApiNotifyNameRoute
+  ConnectNameManifestDotwebmanifestRoute: typeof ConnectNameManifestDotwebmanifestRoute
+  ConnectNameIndexRoute: typeof ConnectNameIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -182,13 +208,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/connect/$name': {
-      id: '/connect/$name'
-      path: '/connect/$name'
-      fullPath: '/connect/$name'
-      preLoaderRoute: typeof ConnectNameRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/api/vapid-public-key': {
       id: '/api/vapid-public-key'
       path: '/api/vapid-public-key'
@@ -208,6 +227,20 @@ declare module '@tanstack/react-router' {
       path: '/api/claim'
       fullPath: '/api/claim'
       preLoaderRoute: typeof ApiClaimRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/connect/$name/': {
+      id: '/connect/$name/'
+      path: '/connect/$name'
+      fullPath: '/connect/$name/'
+      preLoaderRoute: typeof ConnectNameIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/connect/$name/manifest.webmanifest': {
+      id: '/connect/$name/manifest.webmanifest'
+      path: '/connect/$name/manifest.webmanifest'
+      fullPath: '/connect/$name/manifest.webmanifest'
+      preLoaderRoute: typeof ConnectNameManifestDotwebmanifestRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/notify/$name': {
@@ -231,14 +264,23 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiChannelNameSubscribeRouteImport
       parentRoute: typeof ApiChannelNameRoute
     }
+    '/api/channel/$name/ensure': {
+      id: '/api/channel/$name/ensure'
+      path: '/ensure'
+      fullPath: '/api/channel/$name/ensure'
+      preLoaderRoute: typeof ApiChannelNameEnsureRouteImport
+      parentRoute: typeof ApiChannelNameRoute
+    }
   }
 }
 
 interface ApiChannelNameRouteChildren {
+  ApiChannelNameEnsureRoute: typeof ApiChannelNameEnsureRoute
   ApiChannelNameSubscribeRoute: typeof ApiChannelNameSubscribeRoute
 }
 
 const ApiChannelNameRouteChildren: ApiChannelNameRouteChildren = {
+  ApiChannelNameEnsureRoute: ApiChannelNameEnsureRoute,
   ApiChannelNameSubscribeRoute: ApiChannelNameSubscribeRoute,
 }
 
@@ -253,9 +295,11 @@ const rootRouteChildren: RootRouteChildren = {
   ApiClaimRoute: ApiClaimRoute,
   ApiLoginRoute: ApiLoginRoute,
   ApiVapidPublicKeyRoute: ApiVapidPublicKeyRoute,
-  ConnectNameRoute: ConnectNameRoute,
   ApiChannelNameRoute: ApiChannelNameRouteWithChildren,
   ApiNotifyNameRoute: ApiNotifyNameRoute,
+  ConnectNameManifestDotwebmanifestRoute:
+    ConnectNameManifestDotwebmanifestRoute,
+  ConnectNameIndexRoute: ConnectNameIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

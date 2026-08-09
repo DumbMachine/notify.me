@@ -131,7 +131,7 @@ function DashboardPage() {
     }
 
     void refresh()
-    const id = window.setInterval(() => void refresh(), 3000)
+    const id = window.setInterval(() => void refresh(), 1500)
     return () => {
       cancelled = true
       window.clearInterval(id)

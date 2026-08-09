@@ -1,6 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router"
 
-import { authenticateChannel, toPublicChannel } from "@/lib/store"
+import {
+  authenticateChannel,
+  buildConnectUrl,
+  toPublicChannel,
+} from "@/lib/store"
 
 export const Route = createFileRoute("/api/login")({
   server: {
@@ -29,7 +33,7 @@ export const Route = createFileRoute("/api/login")({
             ? (body as { apiKey: string }).apiKey
             : ""
 
-        const result = authenticateChannel(name, apiKey)
+        const result = await authenticateChannel(name, apiKey)
         if (!result.ok) {
           return Response.json({ error: result.error }, { status: result.status })
         }
@@ -40,7 +44,11 @@ export const Route = createFileRoute("/api/login")({
           ...toPublicChannel(result.channel),
           apiKey: result.channel.apiKey,
           notifyUrl: `${origin}/api/notify/${result.channel.name}`,
-          connectUrl: `${origin}/connect/${result.channel.name}`,
+          connectUrl: buildConnectUrl(
+            origin,
+            result.channel.name,
+            result.channel.apiKey
+          ),
           dashboardUrl: `${origin}/${result.channel.name}`,
         })
       },

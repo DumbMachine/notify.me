@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router"
 
-import { claimName, toPublicChannel } from "@/lib/store"
+import { buildConnectUrl, claimName, toPublicChannel } from "@/lib/store"
 
 export const Route = createFileRoute("/api/claim")({
   server: {
@@ -21,7 +21,7 @@ export const Route = createFileRoute("/api/claim")({
             ? (body as { name: string }).name
             : ""
 
-        const result = claimName(name)
+        const result = await claimName(name)
         if (!result.ok) {
           return Response.json({ error: result.error }, { status: result.status })
         }
@@ -32,7 +32,11 @@ export const Route = createFileRoute("/api/claim")({
           ...toPublicChannel(result.channel),
           apiKey: result.channel.apiKey,
           notifyUrl: `${origin}/api/notify/${result.channel.name}`,
-          connectUrl: `${origin}/connect/${result.channel.name}`,
+          connectUrl: buildConnectUrl(
+            origin,
+            result.channel.name,
+            result.channel.apiKey
+          ),
           dashboardUrl: `${origin}/${result.channel.name}`,
         })
       },

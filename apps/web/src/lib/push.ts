@@ -48,7 +48,7 @@ export async function sendPushToChannel(
         : undefined
 
     if (statusCode === 404 || statusCode === 410) {
-      clearSubscription(channel.name)
+      await clearSubscription(channel.name)
       return {
         ok: false,
         error: "Push subscription expired. Reconnect your phone.",
