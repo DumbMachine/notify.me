@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type FormEvent } from "react"
 import { createFileRoute, Link } from "@tanstack/react-router"
-import { BellRingIcon, SmartphoneIcon } from "lucide-react"
+import { ChevronDownIcon } from "lucide-react"
 
 import { CopyButton } from "@/components/copy-button"
 import { QrCode } from "@/components/qr-code"
@@ -8,8 +8,8 @@ import { loadCreds, saveCreds, type StoredCreds } from "@/lib/session"
 import { Badge } from "@workspace/ui/components/badge"
 import { Button } from "@workspace/ui/components/button"
 import { Input } from "@workspace/ui/components/input"
-import { Separator } from "@workspace/ui/components/separator"
 import { Textarea } from "@workspace/ui/components/textarea"
+import { cn } from "@workspace/ui/lib/utils"
 
 export const Route = createFileRoute("/$name")({
   component: DashboardPage,
@@ -48,13 +48,13 @@ function DashboardLogin({
         setError(data.error ?? "Could not restore this name.")
         return
       }
-      const creds = {
+      const next = {
         apiKey: data.apiKey,
         notifyUrl: data.notifyUrl,
         connectUrl: data.connectUrl,
       }
-      saveCreds(name, creds)
-      onRestored(creds)
+      saveCreds(name, next)
+      onRestored(next)
     } catch {
       setError("Something went wrong. Try again.")
     } finally {
@@ -63,22 +63,25 @@ function DashboardLogin({
   }
 
   return (
-    <form onSubmit={onSubmit} className="space-y-3 border border-foreground/10 p-4">
+    <form onSubmit={onSubmit} className="space-y-3">
       <p className="text-sm text-muted-foreground">
-        Enter the API key for <span className="font-medium text-foreground">{name}</span>{" "}
-        to restore this dashboard.
+        Enter the API key for <span className="font-medium text-foreground">{name}</span>.
       </p>
       <Input
         type="password"
         value={apiKey}
         onChange={(e) => setApiKey(e.target.value.trim())}
         placeholder="API key"
-        className="h-9"
+        className="h-12 border-foreground/15 text-base md:text-sm"
         required
         minLength={16}
       />
-      <Button type="submit" disabled={pending || apiKey.length < 16}>
-        {pending ? "Opening…" : "Unlock dashboard"}
+      <Button
+        type="submit"
+        className="h-12 w-full"
+        disabled={pending || apiKey.length < 16}
+      >
+        {pending ? "Opening…" : "Unlock"}
       </Button>
       {error ? (
         <p className="text-sm text-destructive" role="alert">
@@ -86,6 +89,35 @@ function DashboardLogin({
         </p>
       ) : null}
     </form>
+  )
+}
+
+function FieldRow({
+  label,
+  value,
+  mono = true,
+}: {
+  label: string
+  value: string
+  mono?: boolean
+}) {
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center justify-between gap-3">
+        <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
+          {label}
+        </p>
+        <CopyButton value={value} />
+      </div>
+      <p
+        className={cn(
+          "break-all bg-foreground/5 px-3 py-2.5 text-sm leading-relaxed",
+          mono && "font-mono text-xs"
+        )}
+      >
+        {value}
+      </p>
+    </div>
   )
 }
 
@@ -97,6 +129,7 @@ function DashboardPage() {
   const [testBody, setTestBody] = useState("Your phone is connected.")
   const [testResult, setTestResult] = useState<string | null>(null)
   const [testing, setTesting] = useState(false)
+  const [showApi, setShowApi] = useState(false)
 
   const origin =
     typeof window !== "undefined" ? window.location.origin : "http://localhost:3000"
@@ -144,7 +177,7 @@ function DashboardPage() {
 
   async function sendTest() {
     if (!creds) {
-      setTestResult("API key missing from this browser session. Claim the name again.")
+      setTestResult("Unlock this dashboard with your API key first.")
       return
     }
     setTesting(true)
@@ -159,17 +192,17 @@ function DashboardPage() {
         body: JSON.stringify({ title: testTitle, body: testBody }),
       })
       const data = (await response.json()) as { error?: string; ok?: boolean }
-      if (!response.ok) {
-        setTestResult(data.error ?? "Failed to send.")
-      } else {
-        setTestResult("Sent. Check your phone.")
-      }
+      setTestResult(
+        response.ok ? "Sent. Check your phone." : (data.error ?? "Failed to send.")
+      )
     } catch {
       setTestResult("Network error while sending.")
     } finally {
       setTesting(false)
     }
   }
+
+  const connected = Boolean(status?.connected)
 
   return (
     <div className="relative min-h-svh">
@@ -178,132 +211,84 @@ function DashboardPage() {
         className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,_oklch(0.99_0.01_170),_oklch(0.97_0.015_200))]"
       />
 
-      <header className="relative mx-auto flex w-full max-w-5xl items-center justify-between px-6 py-6">
-        <Link
-          to="/"
-          className="font-heading text-xl font-semibold tracking-tight text-foreground"
-        >
-          notify.me
-        </Link>
-        <Badge variant={status?.connected ? "default" : "secondary"}>
-          {status?.connected ? "Phone connected" : "Waiting for phone"}
-        </Badge>
-      </header>
+      <div className="relative mx-auto flex min-h-svh w-full max-w-lg flex-col px-5 pb-[max(2rem,env(safe-area-inset-bottom))] pt-[max(1rem,env(safe-area-inset-top))] sm:px-6">
+        <header className="flex items-center justify-between gap-3 py-4">
+          <Link
+            to="/"
+            className="font-heading text-lg font-semibold tracking-tight"
+          >
+            notify.me
+          </Link>
+          <Badge variant={connected ? "default" : "secondary"}>
+            {connected ? "Connected" : "Waiting"}
+          </Badge>
+        </header>
 
-      <main className="relative mx-auto grid w-full max-w-5xl gap-10 px-6 pb-20 lg:grid-cols-[1.1fr_0.9fr]">
-        <section className="animate-in fade-in slide-in-from-bottom-2 duration-500">
-          <p className="text-sm text-muted-foreground">Your endpoint</p>
-          <h1 className="mt-1 font-heading text-4xl font-semibold tracking-tight sm:text-5xl">
-            {name}
-          </h1>
-          <p className="mt-3 max-w-lg text-sm leading-relaxed text-muted-foreground">
-            Scan the QR on your phone and add{" "}
-            <span className="font-medium text-foreground">/connect/{name}</span>{" "}
-            to the home screen (not the homepage), then allow notifications.
-          </p>
+        <main className="flex flex-1 flex-col gap-8 pb-8">
+          <section className="animate-in fade-in slide-in-from-bottom-2 duration-500">
+            <p className="text-sm text-muted-foreground">Your endpoint</p>
+            <h1 className="mt-1 font-heading text-4xl font-semibold tracking-tight">
+              {name}
+            </h1>
+          </section>
 
-          <div className="mt-8 space-y-5">
-            <div>
-              <div className="mb-2 flex items-center justify-between gap-2">
-                <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                  Notify URL
-                </p>
-                <CopyButton value={notifyUrl} />
-              </div>
-              <code className="block overflow-x-auto bg-foreground/5 px-3 py-2 text-xs">
-                {notifyUrl}
-              </code>
-            </div>
-
-            {creds ? (
-              <div>
-                <div className="mb-2 flex items-center justify-between gap-2">
-                  <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                    API key
-                  </p>
-                  <CopyButton value={creds.apiKey} />
-                </div>
-                <code className="block overflow-x-auto bg-foreground/5 px-3 py-2 text-xs">
-                  {creds.apiKey}
-                </code>
-                <p className="mt-2 text-xs text-muted-foreground">
-                  Saved on this device. Use{" "}
-                  <Link to="/" className="underline-offset-4 hover:underline">
-                    Open existing
-                  </Link>{" "}
-                  with this key if you switch browsers.
-                </p>
-              </div>
-            ) : (
+          {!creds ? (
+            <section className="animate-in fade-in duration-500">
               <DashboardLogin name={name} onRestored={setCreds} />
-            )}
+            </section>
+          ) : (
+            <>
+              <section className="animate-in fade-in slide-in-from-bottom-2 duration-500 delay-75">
+                <div className="flex items-end justify-between gap-3">
+                  <div>
+                    <h2 className="font-heading text-base font-medium">
+                      1. Connect phone
+                    </h2>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      Scan, install, then enable notifications.
+                    </p>
+                  </div>
+                </div>
 
-            <div>
-              <div className="mb-2 flex items-center justify-between gap-2">
-                <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                  Example
-                </p>
-                <CopyButton value={curlExample} label="Copy curl" />
-              </div>
-              <pre className="overflow-x-auto bg-foreground/5 px-3 py-3 text-xs leading-relaxed">
-                {curlExample}
-              </pre>
-            </div>
-          </div>
-        </section>
+                <div className="mt-5 flex flex-col items-center gap-4">
+                  <QrCode value={connectUrl} size={196} className="shadow-sm" />
+                  <div className="flex w-full items-center gap-2">
+                    <p className="min-w-0 flex-1 truncate font-mono text-xs text-muted-foreground">
+                      /connect/{name}
+                    </p>
+                    <CopyButton value={connectUrl} label="Copy link" />
+                  </div>
+                </div>
+              </section>
 
-        <section className="animate-in fade-in slide-in-from-bottom-3 duration-700 delay-100">
-          <div className="border border-foreground/10 bg-background/80 p-6 backdrop-blur">
-            <div className="flex items-start gap-3">
-              <SmartphoneIcon className="mt-0.5 size-5 text-primary" />
-              <div>
-                <h2 className="font-heading text-lg font-medium">Connect phone</h2>
+              <section className="animate-in fade-in slide-in-from-bottom-2 duration-500 delay-100">
+                <h2 className="font-heading text-base font-medium">2. Send a test</h2>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  Open this link on your phone, then add to Home Screen.
+                  {connected
+                    ? "Your phone is ready."
+                    : "Works after the phone is connected."}
                 </p>
-              </div>
-            </div>
-
-            <div className="mt-6 flex justify-center">
-              <QrCode value={connectUrl} size={200} />
-            </div>
-
-            <div className="mt-4 flex items-center gap-2">
-              <code className="min-w-0 flex-1 truncate bg-foreground/5 px-2 py-1.5 text-xs">
-                {connectUrl}
-              </code>
-              <CopyButton value={connectUrl} label="Copy link" />
-            </div>
-
-            <Separator className="my-6" />
-
-            <div className="flex items-start gap-3">
-              <BellRingIcon className="mt-0.5 size-5 text-primary" />
-              <div className="min-w-0 flex-1">
-                <h2 className="font-heading text-lg font-medium">Send a test</h2>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  Once your phone is connected, try a notification from here.
-                </p>
-                <div className="mt-4 space-y-2">
-                  <input
-                    className="h-9 w-full border border-input bg-transparent px-2.5 text-sm outline-none focus-visible:border-ring focus-visible:ring-1 focus-visible:ring-ring/50"
+                <div className="mt-4 space-y-2.5">
+                  <Input
                     value={testTitle}
                     onChange={(e) => setTestTitle(e.target.value)}
                     placeholder="Title"
+                    className="h-12 border-foreground/15 text-base md:text-sm"
                   />
                   <Textarea
                     value={testBody}
                     onChange={(e) => setTestBody(e.target.value)}
                     placeholder="Body"
-                    rows={3}
+                    rows={2}
+                    className="min-h-20 border-foreground/15 text-base md:text-sm"
                   />
                   <Button
                     type="button"
                     onClick={() => void sendTest()}
                     disabled={testing || !testTitle.trim()}
-                    className="w-full"
+                    className="h-12 w-full"
                   >
-                    {testing ? "Sending…" : "Send test notification"}
+                    {testing ? "Sending…" : "Send test"}
                   </Button>
                   {testResult ? (
                     <p className="text-sm text-muted-foreground" role="status">
@@ -311,11 +296,50 @@ function DashboardPage() {
                     </p>
                   ) : null}
                 </div>
-              </div>
-            </div>
-          </div>
-        </section>
-      </main>
+              </section>
+
+              <section className="animate-in fade-in duration-500 delay-150">
+                <button
+                  type="button"
+                  onClick={() => setShowApi((value) => !value)}
+                  className="flex w-full items-center justify-between py-2 text-start"
+                >
+                  <div>
+                    <h2 className="font-heading text-base font-medium">API</h2>
+                    <p className="mt-0.5 text-sm text-muted-foreground">
+                      Endpoint, key, and curl
+                    </p>
+                  </div>
+                  <ChevronDownIcon
+                    className={cn(
+                      "size-4 text-muted-foreground transition-transform",
+                      showApi && "rotate-180"
+                    )}
+                  />
+                </button>
+
+                {showApi ? (
+                  <div className="mt-3 space-y-5 border-t border-foreground/10 pt-5">
+                    <FieldRow label="Notify URL" value={notifyUrl} />
+                    <FieldRow label="API key" value={creds.apiKey} />
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between gap-3">
+                        <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
+                          Example
+                        </p>
+                        <CopyButton value={curlExample} label="Copy curl" />
+                      </div>
+                      <pre className="overflow-x-auto bg-foreground/5 px-3 py-3 font-mono text-[11px] leading-relaxed">
+                        {curlExample}
+                      </pre>
+                    </div>
+                  </div>
+                ) : null}
+              </section>
+            </>
+          )}
+        </main>
+      </div>
     </div>
   )
 }

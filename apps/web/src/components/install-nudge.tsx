@@ -76,8 +76,6 @@ export function InstallNudge({
       }
       return
     }
-
-    // iOS (and browsers without a native install prompt) get a guided nudge.
     setShowGuide(true)
   }
 
@@ -85,15 +83,15 @@ export function InstallNudge({
     platform === "ios"
       ? "Add to Home Screen"
       : deferredPrompt
-        ? "Install notify.me"
-        : "Install app"
+        ? "Install app"
+        : "How to install"
 
   return (
     <>
       <div className={cn("space-y-2", className)}>
         <Button
           type="button"
-          className="h-11 w-full"
+          className="h-12 w-full"
           onClick={() => void onInstallClick()}
           disabled={installing}
         >
@@ -104,12 +102,10 @@ export function InstallNudge({
           )}
           {installing ? "Opening…" : label}
         </Button>
-        <p className="text-center text-xs text-muted-foreground">
+        <p className="text-xs leading-relaxed text-muted-foreground">
           {platform === "ios"
-            ? "Safari can’t install automatically — this shows the one-tap path."
-            : deferredPrompt
-              ? "Installs this connect page as an app on your phone."
-              : "We’ll walk you through adding this page to your home screen."}
+            ? "Opens a short guide — Safari can’t install with one tap."
+            : "Adds this connect page to your home screen."}
         </p>
       </div>
 
@@ -117,26 +113,20 @@ export function InstallNudge({
         <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center">
           <button
             type="button"
-            aria-label="Close install guide"
-            className="absolute inset-0 bg-foreground/40"
+            aria-label="Close"
+            className="absolute inset-0 bg-foreground/35"
             onClick={() => setShowGuide(false)}
           />
           <div
             role="dialog"
             aria-modal="true"
             aria-labelledby={titleId}
-            className="relative z-10 w-full max-w-md animate-in fade-in slide-in-from-bottom-4 border border-foreground/10 bg-background p-5 shadow-lg duration-300 sm:rounded-none"
+            className="relative z-10 w-full max-w-md animate-in fade-in slide-in-from-bottom-4 bg-background px-5 pt-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] shadow-xl duration-300 sm:border sm:border-foreground/10"
           >
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <h2 id={titleId} className="font-heading text-lg font-medium">
-                  {platform === "ios" ? "Add to Home Screen" : "Install notify.me"}
-                </h2>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  Keep this page open so the app opens{" "}
-                  <code className="text-foreground">/connect/{name}</code>.
-                </p>
-              </div>
+            <div className="mb-1 flex items-start justify-between gap-3">
+              <h2 id={titleId} className="font-heading text-lg font-medium">
+                {platform === "ios" ? "Add to Home Screen" : "Install"}
+              </h2>
               <Button
                 type="button"
                 size="icon"
@@ -146,76 +136,80 @@ export function InstallNudge({
                 <XIcon />
               </Button>
             </div>
+            <p className="text-sm text-muted-foreground">
+              Stay on this page so it opens{" "}
+              <span className="text-foreground">/connect/{name}</span>.
+            </p>
+
+            <ol className="mt-5 space-y-4 text-[15px] leading-relaxed">
+              {platform === "ios" ? (
+                <>
+                  <li className="flex gap-3">
+                    <span className="mt-0.5 flex size-6 shrink-0 items-center justify-center bg-primary/10 text-xs font-medium text-primary">
+                      1
+                    </span>
+                    <p>
+                      Tap{" "}
+                      <ShareIcon className="inline size-3.5 align-text-top" />{" "}
+                      <span className="font-medium">Share</span> in Safari.
+                    </p>
+                  </li>
+                  <li className="flex gap-3">
+                    <span className="mt-0.5 flex size-6 shrink-0 items-center justify-center bg-primary/10 text-xs font-medium text-primary">
+                      2
+                    </span>
+                    <p>
+                      Choose{" "}
+                      <SquarePlusIcon className="inline size-3.5 align-text-top" />{" "}
+                      <span className="font-medium">Add to Home Screen</span>.
+                    </p>
+                  </li>
+                  <li className="flex gap-3">
+                    <span className="mt-0.5 flex size-6 shrink-0 items-center justify-center bg-primary/10 text-xs font-medium text-primary">
+                      3
+                    </span>
+                    <p>
+                      Tap <span className="font-medium">Add</span>, open the
+                      icon, then enable notifications.
+                    </p>
+                  </li>
+                </>
+              ) : (
+                <>
+                  <li className="flex gap-3">
+                    <span className="mt-0.5 flex size-6 shrink-0 items-center justify-center bg-primary/10 text-xs font-medium text-primary">
+                      1
+                    </span>
+                    <p>
+                      Open the browser menu{" "}
+                      <span className="font-medium">(⋮)</span>.
+                    </p>
+                  </li>
+                  <li className="flex gap-3">
+                    <span className="mt-0.5 flex size-6 shrink-0 items-center justify-center bg-primary/10 text-xs font-medium text-primary">
+                      2
+                    </span>
+                    <p>
+                      Tap <span className="font-medium">Install app</span> or{" "}
+                      <span className="font-medium">Add to Home screen</span>.
+                    </p>
+                  </li>
+                  <li className="flex gap-3">
+                    <span className="mt-0.5 flex size-6 shrink-0 items-center justify-center bg-primary/10 text-xs font-medium text-primary">
+                      3
+                    </span>
+                    <p>Open it, then enable notifications.</p>
+                  </li>
+                </>
+              )}
+            </ol>
 
             {platform === "ios" ? (
-              <ol className="mt-5 space-y-4 text-sm">
-                <li className="flex gap-3">
-                  <span className="flex size-7 shrink-0 items-center justify-center bg-primary/10 text-xs font-medium text-primary">
-                    1
-                  </span>
-                  <p>
-                    Tap the <ShareIcon className="inline size-3.5 align-text-top" />{" "}
-                    <span className="font-medium">Share</span> button in Safari
-                    (bottom center).
-                  </p>
-                </li>
-                <li className="flex gap-3">
-                  <span className="flex size-7 shrink-0 items-center justify-center bg-primary/10 text-xs font-medium text-primary">
-                    2
-                  </span>
-                  <p>
-                    Scroll and tap{" "}
-                    <SquarePlusIcon className="inline size-3.5 align-text-top" />{" "}
-                    <span className="font-medium">Add to Home Screen</span>.
-                  </p>
-                </li>
-                <li className="flex gap-3">
-                  <span className="flex size-7 shrink-0 items-center justify-center bg-primary/10 text-xs font-medium text-primary">
-                    3
-                  </span>
-                  <p>
-                    Confirm the name looks right, then tap{" "}
-                    <span className="font-medium">Add</span>. Open the icon and
-                    enable notifications.
-                  </p>
-                </li>
-              </ol>
-            ) : (
-              <ol className="mt-5 space-y-4 text-sm">
-                <li className="flex gap-3">
-                  <span className="flex size-7 shrink-0 items-center justify-center bg-primary/10 text-xs font-medium text-primary">
-                    1
-                  </span>
-                  <p>
-                    Tap the browser menu{" "}
-                    <span className="font-medium">(⋮)</span>.
-                  </p>
-                </li>
-                <li className="flex gap-3">
-                  <span className="flex size-7 shrink-0 items-center justify-center bg-primary/10 text-xs font-medium text-primary">
-                    2
-                  </span>
-                  <p>
-                    Choose{" "}
-                    <span className="font-medium">Install app</span> or{" "}
-                    <span className="font-medium">Add to Home screen</span>.
-                  </p>
-                </li>
-                <li className="flex gap-3">
-                  <span className="flex size-7 shrink-0 items-center justify-center bg-primary/10 text-xs font-medium text-primary">
-                    3
-                  </span>
-                  <p>Open the installed app, then enable notifications.</p>
-                </li>
-              </ol>
-            )}
-
-            {platform === "ios" ? (
-              <div className="pointer-events-none mt-6 flex justify-center">
-                <div className="animate-bounce text-primary">
-                  <ShareIcon className="size-6" />
-                  <p className="mt-1 text-[10px] tracking-wide uppercase">
-                    Share is below
+              <div className="pointer-events-none mt-6 flex justify-center text-primary">
+                <div className="animate-bounce text-center">
+                  <ShareIcon className="mx-auto size-5" />
+                  <p className="mt-1 text-[10px] tracking-[0.14em] uppercase">
+                    Share below
                   </p>
                 </div>
               </div>
@@ -223,7 +217,7 @@ export function InstallNudge({
 
             <Button
               type="button"
-              className="mt-6 w-full"
+              className="mt-6 h-12 w-full"
               variant="outline"
               onClick={() => setShowGuide(false)}
             >

@@ -1,10 +1,9 @@
 import { useEffect, useState } from "react"
 import { createFileRoute, Link } from "@tanstack/react-router"
-import { BellIcon, CheckCircle2Icon } from "lucide-react"
+import { CheckCircle2Icon } from "lucide-react"
 
 import { InstallNudge } from "@/components/install-nudge"
 import { bindDevice } from "@/lib/session"
-import { Alert, AlertDescription, AlertTitle } from "@workspace/ui/components/alert"
 import { Badge } from "@workspace/ui/components/badge"
 import { Button } from "@workspace/ui/components/button"
 
@@ -16,14 +15,8 @@ export const Route = createFileRoute("/connect/$name/")({
   head: ({ params }) => ({
     meta: [
       { title: `Connect · ${params.name} · notify.me` },
-      {
-        name: "apple-mobile-web-app-capable",
-        content: "yes",
-      },
-      {
-        name: "mobile-web-app-capable",
-        content: "yes",
-      },
+      { name: "apple-mobile-web-app-capable", content: "yes" },
+      { name: "mobile-web-app-capable", content: "yes" },
       {
         name: "apple-mobile-web-app-title",
         content: `notify.me/${params.name}`,
@@ -136,15 +129,10 @@ function ConnectPage() {
 
     try {
       if (!("serviceWorker" in navigator) || !("PushManager" in window)) {
-        throw new Error(
-          "Push notifications are not supported in this browser. Try Chrome or Safari on a phone."
-        )
+        throw new Error("Push isn’t supported in this browser.")
       }
-
       if (!window.isSecureContext) {
-        throw new Error(
-          "Notifications require HTTPS (or localhost). Open this page over a secure origin."
-        )
+        throw new Error("Notifications need HTTPS (or localhost).")
       }
 
       if (apiKey) {
@@ -172,9 +160,7 @@ function ConnectPage() {
 
       const vapidResponse = await fetch("/api/vapid-public-key")
       const vapid = (await vapidResponse.json()) as { publicKey?: string }
-      if (!vapid.publicKey) {
-        throw new Error("Could not load VAPID public key.")
-      }
+      if (!vapid.publicKey) throw new Error("Could not load VAPID public key.")
 
       const existing = await registration.pushManager.getSubscription()
       const subscription =
@@ -201,9 +187,7 @@ function ConnectPage() {
       bindDevice(name)
       setConnected(true)
       setStep("done")
-      setMessage(
-        "You're connected. Your dashboard should show Phone connected within a few seconds."
-      )
+      setMessage("Connected. Your dashboard should update in a moment.")
     } catch (error) {
       setStep("error")
       setMessage(error instanceof Error ? error.message : "Something went wrong.")
@@ -212,22 +196,22 @@ function ConnectPage() {
 
   if (channelOk === false) {
     return (
-      <main className="mx-auto flex min-h-svh max-w-md flex-col justify-center gap-4 px-6">
+      <main className="mx-auto flex min-h-svh max-w-md flex-col justify-center gap-4 px-5">
         <h1 className="font-heading text-3xl font-semibold tracking-tight">
-          Unknown name
+          Link expired
         </h1>
-        <p className="text-sm text-muted-foreground">
-          <span className="font-medium text-foreground">{name}</span> is not
-          available. Open the QR from your dashboard (it includes a key), or use{" "}
-          <span className="font-medium text-foreground">Open existing</span> on
-          the homepage.
+        <p className="text-sm leading-relaxed text-muted-foreground">
+          Open the QR from your dashboard again, or use{" "}
+          <span className="text-foreground">Open existing</span> on the homepage.
         </p>
-        <Button nativeButton={false} render={<Link to="/" />}>
+        <Button nativeButton={false} className="h-12" render={<Link to="/" />}>
           Back to notify.me
         </Button>
       </main>
     )
   }
+
+  const notificationsReady = permission === "granted" && connected
 
   return (
     <div className="relative min-h-svh">
@@ -236,91 +220,88 @@ function ConnectPage() {
         className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_oklch(0.93_0.05_170),_transparent_50%),linear-gradient(180deg,_oklch(0.99_0.01_170),_oklch(0.96_0.02_200))]"
       />
 
-      <main className="relative mx-auto flex min-h-svh w-full max-w-md flex-col px-6 py-10 pb-28">
-        <div className="flex items-center justify-between">
+      <main className="relative mx-auto flex min-h-svh w-full max-w-md flex-col px-5 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-[max(1rem,env(safe-area-inset-top))]">
+        <header className="flex items-center justify-between py-4">
           <Link to="/" className="font-heading text-lg font-semibold tracking-tight">
             notify.me
           </Link>
           <Badge variant={connected ? "default" : "secondary"}>
             {connected ? "Connected" : "Setup"}
           </Badge>
-        </div>
+        </header>
 
-        <div className="mt-10 animate-in fade-in slide-in-from-bottom-2 duration-500">
-          <p className="text-sm text-muted-foreground">Connecting</p>
+        <div className="mt-4 animate-in fade-in slide-in-from-bottom-2 duration-500">
+          <p className="text-sm text-muted-foreground">Phone setup</p>
           <h1 className="mt-1 font-heading text-4xl font-semibold tracking-tight">
             {name}
           </h1>
-          <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-            Install this page on your phone, then enable notifications so your
-            API can reach you.
+          <p className="mt-3 text-[15px] leading-relaxed text-muted-foreground">
+            Two steps. Install this page, then allow notifications.
           </p>
         </div>
 
-        <section className="mt-8 space-y-4 animate-in fade-in slide-in-from-bottom-3 duration-700 delay-100">
-          <div className="border border-foreground/10 bg-background/70 p-4 backdrop-blur">
-            <div className="flex items-center gap-2">
-              <h2 className="font-heading text-sm font-medium">1. Install app</h2>
+        <ol className="mt-10 space-y-8 animate-in fade-in slide-in-from-bottom-3 duration-700 delay-75">
+          <li>
+            <div className="mb-3 flex items-center gap-2">
+              <span className="flex size-6 items-center justify-center bg-primary/10 text-xs font-medium text-primary">
+                1
+              </span>
+              <h2 className="font-heading text-base font-medium">Install</h2>
               {isStandalone ? (
                 <CheckCircle2Icon className="ms-auto size-4 text-primary" />
               ) : null}
             </div>
             {isStandalone ? (
-              <p className="mt-3 text-sm text-muted-foreground">
-                Running as an installed app. Next: enable notifications.
+              <p className="text-sm text-muted-foreground">
+                Installed. Continue below.
               </p>
             ) : (
-              <div className="mt-4">
-                <InstallNudge name={name} />
-              </div>
+              <InstallNudge name={name} />
             )}
-          </div>
+          </li>
 
-          <div className="border border-foreground/10 bg-background/70 p-4 backdrop-blur">
-            <div className="flex items-center gap-2">
-              <BellIcon className="size-4 text-primary" />
-              <h2 className="font-heading text-sm font-medium">
-                2. Enable notifications
-              </h2>
-              {permission === "granted" && connected ? (
+          <li>
+            <div className="mb-3 flex items-center gap-2">
+              <span className="flex size-6 items-center justify-center bg-primary/10 text-xs font-medium text-primary">
+                2
+              </span>
+              <h2 className="font-heading text-base font-medium">Notifications</h2>
+              {notificationsReady ? (
                 <CheckCircle2Icon className="ms-auto size-4 text-primary" />
               ) : null}
             </div>
-            <p className="mt-2 text-sm text-muted-foreground">
-              Allow alerts so POST requests to your notify endpoint can wake this
-              device.
-            </p>
             <Button
               type="button"
-              className="mt-4 w-full"
+              className="h-12 w-full"
               onClick={() => void enableNotifications()}
               disabled={step === "working"}
+              variant={notificationsReady ? "outline" : "default"}
             >
               {step === "working"
                 ? "Enabling…"
-                : connected
-                  ? "Reconnect notifications"
+                : notificationsReady
+                  ? "Reconnect"
                   : "Enable notifications"}
             </Button>
-          </div>
-        </section>
+          </li>
+        </ol>
 
         {message ? (
-          <Alert
-            className="mt-6"
-            variant={step === "error" ? "destructive" : "default"}
+          <p
+            className={
+              step === "error"
+                ? "mt-6 text-sm text-destructive"
+                : "mt-6 text-sm text-muted-foreground"
+            }
+            role="status"
           >
-            <AlertTitle>
-              {step === "error" ? "Could not connect" : "Ready"}
-            </AlertTitle>
-            <AlertDescription>{message}</AlertDescription>
-          </Alert>
+            {message}
+          </p>
         ) : null}
 
-        <p className="mt-auto pt-10 text-center text-xs text-muted-foreground">
-          To manage the API later, open notify.me and use{" "}
-          <span className="text-foreground">Open existing</span> with your API
-          key.
+        <p className="mt-auto pt-12 text-center text-xs text-muted-foreground">
+          Manage the API later with{" "}
+          <span className="text-foreground">Open existing</span>.
         </p>
       </main>
     </div>

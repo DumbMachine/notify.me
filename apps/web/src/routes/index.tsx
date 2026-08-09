@@ -9,7 +9,7 @@ import {
 } from "@/lib/session"
 import { Button } from "@workspace/ui/components/button"
 import { Input } from "@workspace/ui/components/input"
-import { Label } from "@workspace/ui/components/label"
+import { cn } from "@workspace/ui/lib/utils"
 
 export const Route = createFileRoute("/")({ component: HomePage })
 
@@ -47,7 +47,6 @@ function HomePage() {
     const last = getLastName()
     if (last) setName((current) => current || last)
 
-    // Home-screen apps that landed on `/` should bounce back to the bound phone page.
     if (bound && isStandaloneDisplay()) {
       void navigate({ to: "/connect/$name", params: { name: bound }, replace: true })
     }
@@ -66,7 +65,6 @@ function HomePage() {
     event.preventDefault()
     setError(null)
     setPending(true)
-
     try {
       const response = await fetch("/api/claim", {
         method: "POST",
@@ -90,7 +88,6 @@ function HomePage() {
     event.preventDefault()
     setError(null)
     setPending(true)
-
     try {
       const response = await fetch("/api/login", {
         method: "POST",
@@ -111,93 +108,67 @@ function HomePage() {
   }
 
   return (
-    <div className="relative min-h-svh overflow-hidden">
+    <div className="relative min-h-svh">
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,_oklch(0.92_0.04_170)_0%,_transparent_55%),linear-gradient(180deg,_oklch(0.99_0.01_170),_oklch(0.97_0.02_200))]"
-      />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -top-24 end-[-10%] size-[28rem] rounded-full bg-primary/15 blur-3xl"
-      />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute bottom-[-20%] start-[-10%] size-[24rem] rounded-full bg-teal-500/10 blur-3xl"
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_20%_0%,_oklch(0.93_0.05_170)_0%,_transparent_45%),linear-gradient(180deg,_oklch(0.99_0.01_170),_oklch(0.97_0.02_200))]"
       />
 
-      <main className="relative mx-auto flex min-h-svh w-full max-w-3xl flex-col justify-center px-6 py-16">
-        <div className="animate-in fade-in slide-in-from-bottom-2 duration-700 fill-mode-both">
-          <p className="font-heading text-5xl font-semibold tracking-tight text-foreground sm:text-6xl md:text-7xl">
+      <main className="relative mx-auto flex min-h-svh w-full max-w-md flex-col px-5 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-[max(2.5rem,env(safe-area-inset-top))] sm:justify-center sm:px-6">
+        <div className="animate-in fade-in slide-in-from-bottom-2 duration-500">
+          <h1 className="font-heading text-[2.75rem] leading-none font-semibold tracking-tight sm:text-6xl">
             notify.me
-          </p>
-          <p className="mt-4 max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg">
-            Claim a name, connect your phone, and send yourself push
-            notifications with one API call.
+          </h1>
+          <p className="mt-4 max-w-[22rem] text-[15px] leading-relaxed text-muted-foreground">
+            Claim a name. Connect your phone. Push to it with one API call.
           </p>
         </div>
 
-        {deviceName ? (
-          <div className="mt-8 max-w-md animate-in fade-in duration-500">
-            <Button
+        <div className="mt-10 flex flex-1 flex-col gap-5 sm:mt-12 sm:flex-none">
+          {deviceName ? (
+            <button
               type="button"
-              variant="outline"
-              className="h-11 w-full justify-between px-3"
               onClick={() =>
                 void navigate({
                   to: "/connect/$name",
                   params: { name: deviceName },
                 })
               }
+              className="flex h-12 items-center justify-between gap-3 border border-foreground/10 bg-background/70 px-4 text-start text-sm backdrop-blur transition-colors hover:bg-background"
             >
-              <span className="text-muted-foreground">This phone</span>
-              <span className="font-medium">Open {deviceName}</span>
-              <ArrowRightIcon />
-            </Button>
+              <span className="text-muted-foreground">Continue as</span>
+              <span className="flex items-center gap-2 font-medium">
+                {deviceName}
+                <ArrowRightIcon className="size-4" />
+              </span>
+            </button>
+          ) : null}
+
+          <div className="grid grid-cols-2 gap-1 bg-foreground/5 p-1">
+            {(["claim", "login"] as const).map((value) => (
+              <button
+                key={value}
+                type="button"
+                onClick={() => {
+                  setMode(value)
+                  setError(null)
+                }}
+                className={cn(
+                  "h-10 text-sm transition-colors",
+                  mode === value
+                    ? "bg-background font-medium text-foreground shadow-sm"
+                    : "text-muted-foreground"
+                )}
+              >
+                {value === "claim" ? "New name" : "Open existing"}
+              </button>
+            ))}
           </div>
-        ) : null}
 
-        <div className="mt-8 flex max-w-md gap-4 text-sm animate-in fade-in duration-500">
-          <button
-            type="button"
-            className={
-              mode === "claim"
-                ? "font-medium text-foreground underline-offset-4"
-                : "text-muted-foreground hover:text-foreground"
-            }
-            onClick={() => {
-              setMode("claim")
-              setError(null)
-            }}
-          >
-            Claim a name
-          </button>
-          <button
-            type="button"
-            className={
-              mode === "login"
-                ? "font-medium text-foreground underline-offset-4"
-                : "text-muted-foreground hover:text-foreground"
-            }
-            onClick={() => {
-              setMode("login")
-              setError(null)
-            }}
-          >
-            Open existing
-          </button>
-        </div>
-
-        {mode === "claim" ? (
-          <form
-            onSubmit={onClaim}
-            className="mt-4 max-w-md animate-in fade-in slide-in-from-bottom-3 duration-700 fill-mode-both"
-          >
-            <Label htmlFor="name" className="text-xs text-muted-foreground">
-              Your name
-            </Label>
-            <div className="mt-2 flex gap-2">
-              <div className="relative min-w-0 flex-1">
-                <span className="pointer-events-none absolute inset-y-0 start-2.5 flex items-center text-xs text-muted-foreground">
+          {mode === "claim" ? (
+            <form onSubmit={onClaim} className="space-y-3">
+              <div className="relative">
+                <span className="pointer-events-none absolute inset-y-0 start-3 flex items-center text-sm text-muted-foreground">
                   notify.me/
                 </span>
                 <Input
@@ -205,11 +176,12 @@ function HomePage() {
                   name="name"
                   autoComplete="off"
                   autoCapitalize="none"
+                  autoCorrect="off"
                   spellCheck={false}
                   placeholder="alex"
                   value={name}
                   onChange={(e) => setName(e.target.value.toLowerCase())}
-                  className="h-11 pe-3 ps-[5.5rem] text-sm"
+                  className="h-12 border-foreground/15 pe-3 ps-[5.75rem] text-base md:text-sm"
                   required
                   minLength={3}
                   maxLength={32}
@@ -218,35 +190,17 @@ function HomePage() {
               </div>
               <Button
                 type="submit"
-                size="lg"
-                className="h-11 px-4"
+                className="h-12 w-full text-sm"
                 disabled={pending || name.trim().length < 3}
               >
-                {pending ? "Claiming…" : "Claim"}
+                {pending ? "Claiming…" : "Claim name"}
                 <ArrowRightIcon data-icon="inline-end" />
               </Button>
-            </div>
-            {error ? (
-              <p className="mt-3 text-sm text-destructive" role="alert">
-                {error}
-              </p>
-            ) : (
-              <p className="mt-3 text-xs text-muted-foreground">
-                In-memory for now — names reset when the server restarts.
-              </p>
-            )}
-          </form>
-        ) : (
-          <form
-            onSubmit={onLogin}
-            className="mt-4 max-w-md space-y-3 animate-in fade-in slide-in-from-bottom-3 duration-700 fill-mode-both"
-          >
-            <div>
-              <Label htmlFor="login-name" className="text-xs text-muted-foreground">
-                Name
-              </Label>
-              <div className="relative mt-2">
-                <span className="pointer-events-none absolute inset-y-0 start-2.5 flex items-center text-xs text-muted-foreground">
+            </form>
+          ) : (
+            <form onSubmit={onLogin} className="space-y-3">
+              <div className="relative">
+                <span className="pointer-events-none absolute inset-y-0 start-3 flex items-center text-sm text-muted-foreground">
                   notify.me/
                 </span>
                 <Input
@@ -256,50 +210,46 @@ function HomePage() {
                   spellCheck={false}
                   value={name}
                   onChange={(e) => setName(e.target.value.toLowerCase())}
-                  className="h-11 pe-3 ps-[5.5rem] text-sm"
+                  className="h-12 border-foreground/15 pe-3 ps-[5.75rem] text-base md:text-sm"
                   required
                   minLength={3}
                   maxLength={32}
                 />
               </div>
-            </div>
-            <div>
-              <Label htmlFor="api-key" className="text-xs text-muted-foreground">
-                API key
-              </Label>
               <Input
                 id="api-key"
                 type="password"
                 autoComplete="current-password"
                 value={apiKey}
                 onChange={(e) => setApiKey(e.target.value.trim())}
-                className="mt-2 h-11 text-sm"
+                className="h-12 border-foreground/15 text-base md:text-sm"
                 required
                 minLength={16}
-                placeholder="Paste the key from your dashboard"
+                placeholder="API key"
               />
-            </div>
-            <Button
-              type="submit"
-              size="lg"
-              className="h-11 w-full"
-              disabled={pending || name.trim().length < 3 || apiKey.length < 16}
-            >
-              {pending ? "Opening…" : "Open dashboard"}
-              <ArrowRightIcon data-icon="inline-end" />
-            </Button>
-            {error ? (
-              <p className="text-sm text-destructive" role="alert">
-                {error}
-              </p>
-            ) : (
-              <p className="text-xs text-muted-foreground">
-                Use this if you closed the browser or need the QR / API details
-                again.
-              </p>
-            )}
-          </form>
-        )}
+              <Button
+                type="submit"
+                className="h-12 w-full text-sm"
+                disabled={pending || name.trim().length < 3 || apiKey.length < 16}
+              >
+                {pending ? "Opening…" : "Open dashboard"}
+                <ArrowRightIcon data-icon="inline-end" />
+              </Button>
+            </form>
+          )}
+
+          {error ? (
+            <p className="text-sm text-destructive" role="alert">
+              {error}
+            </p>
+          ) : (
+            <p className="text-xs leading-relaxed text-muted-foreground">
+              {mode === "claim"
+                ? "Names are temporary while storage is in-memory / demo-backed."
+                : "Use your name and API key to get the QR and endpoint again."}
+            </p>
+          )}
+        </div>
       </main>
     </div>
   )
