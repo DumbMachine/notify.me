@@ -9,11 +9,33 @@ export type PushSubscriptionJSON = {
   }
 }
 
+export type NotificationEntry = {
+  id: string
+  title: string
+  body: string
+  url?: string
+  createdAt: number
+  delivered: boolean
+}
+
 export type Channel = {
   name: string
   apiKey: string
   subscription: PushSubscriptionJSON | null
   createdAt: number
+  /** Newest first. Capped when appended. */
+  notifications?: NotificationEntry[]
+}
+
+const MAX_NOTIFICATIONS = 40
+
+function normalizeChannel(channel: Channel): Channel {
+  return {
+    ...channel,
+    notifications: Array.isArray(channel.notifications)
+      ? channel.notifications
+      : [],
+  }
 }
 
 type ChannelMap = Record<string, Channel>
@@ -163,6 +185,7 @@ export async function claimName(rawName: string): Promise<
     apiKey: generateApiKey(),
     subscription: null,
     createdAt: Date.now(),
+    notifications: [],
   }
 
   channels[name] = channel
@@ -187,7 +210,7 @@ export async function ensureChannel(
     if (existing.apiKey !== apiKey) {
       return { ok: false, error: "Invalid name or API key.", status: 401 }
     }
-    return { ok: true, channel: existing }
+    return { ok: true, channel: normalizeChannel(existing) }
   }
 
   const channel: Channel = {
@@ -195,6 +218,7 @@ export async function ensureChannel(
     apiKey,
     subscription: null,
     createdAt: Date.now(),
+    notifications: [],
   }
   channels[name] = channel
   await writeAll(channels)
@@ -221,7 +245,49 @@ export async function getChannel(
   rawName: string
 ): Promise<Channel | undefined> {
   const channels = await readAll()
-  return channels[normalizeName(rawName)]
+  const channel = channels[normalizeName(rawName)]
+  return channel ? normalizeChannel(channel) : undefined
+}
+
+export function createNotificationId(): string {
+  const bytes = crypto.getRandomValues(new Uint8Array(8))
+  return Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("")
+}
+
+export async function appendNotification(
+  rawName: string,
+  entry: Omit<NotificationEntry, "id" | "createdAt"> & {
+    id?: string
+    createdAt?: number
+  }
+): Promise<NotificationEntry | undefined> {
+  const channels = await readAll()
+  const name = normalizeName(rawName)
+  const channel = channels[name]
+  if (!channel) return undefined
+
+  const notification: NotificationEntry = {
+    id: entry.id ?? createNotificationId(),
+    title: entry.title,
+    body: entry.body,
+    url: entry.url,
+    createdAt: entry.createdAt ?? Date.now(),
+    delivered: entry.delivered,
+  }
+
+  const previous = normalizeChannel(channel).notifications ?? []
+  channel.notifications = [notification, ...previous].slice(0, MAX_NOTIFICATIONS)
+  channels[name] = channel
+  await writeAll(channels)
+  return notification
+}
+
+export async function listNotifications(
+  rawName: string
+): Promise<NotificationEntry[] | undefined> {
+  const channel = await getChannel(rawName)
+  if (!channel) return undefined
+  return channel.notifications ?? []
 }
 
 export async function setSubscription(

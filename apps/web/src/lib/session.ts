@@ -1,11 +1,16 @@
 const CREDS_PREFIX = "notify.me:creds:"
 const DEVICE_KEY = "notify.me:device"
 const LAST_NAME_KEY = "notify.me:last-name"
+const DEVICE_CHANNEL_PREFIX = "notify.me:device-channel:"
 
 export type StoredCreds = {
   apiKey: string
   notifyUrl: string
   connectUrl: string
+}
+
+export type DeviceChannel = {
+  apiKey: string
 }
 
 function canUseStorage() {
@@ -18,6 +23,7 @@ export function saveCreds(name: string, creds: StoredCreds) {
   localStorage.setItem(`${CREDS_PREFIX}${name}`, payload)
   sessionStorage.setItem(`notify.me:${name}`, payload)
   localStorage.setItem(LAST_NAME_KEY, name)
+  saveDeviceChannel(name, { apiKey: creds.apiKey })
 }
 
 export function loadCreds(name: string): StoredCreds | null {
@@ -31,6 +37,34 @@ export function loadCreds(name: string): StoredCreds | null {
   } catch {
     return null
   }
+}
+
+export function saveDeviceChannel(name: string, channel: DeviceChannel) {
+  if (!canUseStorage()) return
+  localStorage.setItem(
+    `${DEVICE_CHANNEL_PREFIX}${name}`,
+    JSON.stringify(channel)
+  )
+  localStorage.setItem(DEVICE_KEY, name)
+  localStorage.setItem(LAST_NAME_KEY, name)
+}
+
+export function loadDeviceChannel(name: string): DeviceChannel | null {
+  if (!canUseStorage()) return null
+  try {
+    const raw = localStorage.getItem(`${DEVICE_CHANNEL_PREFIX}${name}`)
+    if (!raw) return null
+    const parsed = JSON.parse(raw) as DeviceChannel
+    if (!parsed?.apiKey) return null
+    return parsed
+  } catch {
+    return null
+  }
+}
+
+export function resolveDeviceApiKey(name: string, fromUrl?: string | null) {
+  if (fromUrl) return fromUrl
+  return loadDeviceChannel(name)?.apiKey ?? loadCreds(name)?.apiKey ?? null
 }
 
 export function bindDevice(name: string) {

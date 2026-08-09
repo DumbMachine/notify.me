@@ -20,8 +20,8 @@ export const Route = createFileRoute("/connect/$name/manifest.webmanifest")({
           scope: ".",
           display: "standalone",
           orientation: "portrait-primary",
-          theme_color: "#0f766e",
-          background_color: "#f7fbfa",
+          theme_color: "#0f1a18",
+          background_color: "#0f1a18",
           icons: [
             {
               src: "/logo192.png",

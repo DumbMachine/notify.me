@@ -167,9 +167,17 @@ function DashboardPage() {
         },
         body: JSON.stringify({ title: testTitle, body: testBody }),
       })
-      const data = (await response.json()) as { error?: string; ok?: boolean }
+      const data = (await response.json()) as {
+        error?: string
+        ok?: boolean
+        delivered?: boolean
+      }
       setTestResult(
-        response.ok ? "Sent. Check your phone." : (data.error ?? "Failed to send.")
+        response.ok
+          ? data.delivered
+            ? "Sent. Check your lock screen."
+            : "Saved to lock screen history. Enable alerts on the phone for push."
+          : (data.error ?? "Failed to send.")
       )
     } catch {
       setTestResult("Network error while sending.")

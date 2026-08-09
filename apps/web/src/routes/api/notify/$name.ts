@@ -73,7 +73,11 @@ export const Route = createFileRoute("/api/notify/$name")({
           return Response.json({ error: result.error }, { status: result.status })
         }
 
-        return Response.json({ ok: true, delivered: true })
+        return Response.json({
+          ok: true,
+          delivered: result.delivered,
+          notification: result.notification,
+        })
       },
     },
   },

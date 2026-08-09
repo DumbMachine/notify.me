@@ -20,6 +20,7 @@ import { Route as ConnectNameManifestDotwebmanifestRouteImport } from './routes/
 import { Route as ApiNotifyNameRouteImport } from './routes/api/notify/$name'
 import { Route as ApiChannelNameRouteImport } from './routes/api/channel/$name'
 import { Route as ApiChannelNameSubscribeRouteImport } from './routes/api/channel/$name/subscribe'
+import { Route as ApiChannelNameNotificationsRouteImport } from './routes/api/channel/$name/notifications'
 import { Route as ApiChannelNameEnsureRouteImport } from './routes/api/channel/$name/ensure'
 
 const ManifestDotwebmanifestRoute = ManifestDotwebmanifestRouteImport.update({
@@ -78,6 +79,12 @@ const ApiChannelNameSubscribeRoute = ApiChannelNameSubscribeRouteImport.update({
   path: '/subscribe',
   getParentRoute: () => ApiChannelNameRoute,
 } as any)
+const ApiChannelNameNotificationsRoute =
+  ApiChannelNameNotificationsRouteImport.update({
+    id: '/notifications',
+    path: '/notifications',
+    getParentRoute: () => ApiChannelNameRoute,
+  } as any)
 const ApiChannelNameEnsureRoute = ApiChannelNameEnsureRouteImport.update({
   id: '/ensure',
   path: '/ensure',
@@ -96,6 +103,7 @@ export interface FileRoutesByFullPath {
   '/connect/$name/manifest.webmanifest': typeof ConnectNameManifestDotwebmanifestRoute
   '/connect/$name/': typeof ConnectNameIndexRoute
   '/api/channel/$name/ensure': typeof ApiChannelNameEnsureRoute
+  '/api/channel/$name/notifications': typeof ApiChannelNameNotificationsRoute
   '/api/channel/$name/subscribe': typeof ApiChannelNameSubscribeRoute
 }
 export interface FileRoutesByTo {
@@ -110,6 +118,7 @@ export interface FileRoutesByTo {
   '/connect/$name/manifest.webmanifest': typeof ConnectNameManifestDotwebmanifestRoute
   '/connect/$name': typeof ConnectNameIndexRoute
   '/api/channel/$name/ensure': typeof ApiChannelNameEnsureRoute
+  '/api/channel/$name/notifications': typeof ApiChannelNameNotificationsRoute
   '/api/channel/$name/subscribe': typeof ApiChannelNameSubscribeRoute
 }
 export interface FileRoutesById {
@@ -125,6 +134,7 @@ export interface FileRoutesById {
   '/connect/$name/manifest.webmanifest': typeof ConnectNameManifestDotwebmanifestRoute
   '/connect/$name/': typeof ConnectNameIndexRoute
   '/api/channel/$name/ensure': typeof ApiChannelNameEnsureRoute
+  '/api/channel/$name/notifications': typeof ApiChannelNameNotificationsRoute
   '/api/channel/$name/subscribe': typeof ApiChannelNameSubscribeRoute
 }
 export interface FileRouteTypes {
@@ -141,6 +151,7 @@ export interface FileRouteTypes {
     | '/connect/$name/manifest.webmanifest'
     | '/connect/$name/'
     | '/api/channel/$name/ensure'
+    | '/api/channel/$name/notifications'
     | '/api/channel/$name/subscribe'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -155,6 +166,7 @@ export interface FileRouteTypes {
     | '/connect/$name/manifest.webmanifest'
     | '/connect/$name'
     | '/api/channel/$name/ensure'
+    | '/api/channel/$name/notifications'
     | '/api/channel/$name/subscribe'
   id:
     | '__root__'
@@ -169,6 +181,7 @@ export interface FileRouteTypes {
     | '/connect/$name/manifest.webmanifest'
     | '/connect/$name/'
     | '/api/channel/$name/ensure'
+    | '/api/channel/$name/notifications'
     | '/api/channel/$name/subscribe'
   fileRoutesById: FileRoutesById
 }
@@ -264,6 +277,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiChannelNameSubscribeRouteImport
       parentRoute: typeof ApiChannelNameRoute
     }
+    '/api/channel/$name/notifications': {
+      id: '/api/channel/$name/notifications'
+      path: '/notifications'
+      fullPath: '/api/channel/$name/notifications'
+      preLoaderRoute: typeof ApiChannelNameNotificationsRouteImport
+      parentRoute: typeof ApiChannelNameRoute
+    }
     '/api/channel/$name/ensure': {
       id: '/api/channel/$name/ensure'
       path: '/ensure'
@@ -276,11 +296,13 @@ declare module '@tanstack/react-router' {
 
 interface ApiChannelNameRouteChildren {
   ApiChannelNameEnsureRoute: typeof ApiChannelNameEnsureRoute
+  ApiChannelNameNotificationsRoute: typeof ApiChannelNameNotificationsRoute
   ApiChannelNameSubscribeRoute: typeof ApiChannelNameSubscribeRoute
 }
 
 const ApiChannelNameRouteChildren: ApiChannelNameRouteChildren = {
   ApiChannelNameEnsureRoute: ApiChannelNameEnsureRoute,
+  ApiChannelNameNotificationsRoute: ApiChannelNameNotificationsRoute,
   ApiChannelNameSubscribeRoute: ApiChannelNameSubscribeRoute,
 }
 
