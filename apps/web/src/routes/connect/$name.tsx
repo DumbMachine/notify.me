@@ -1,12 +1,8 @@
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useState } from "react"
 import { createFileRoute, Link } from "@tanstack/react-router"
-import {
-  BellIcon,
-  CheckCircle2Icon,
-  HomeIcon,
-  ShareIcon,
-} from "lucide-react"
+import { BellIcon, CheckCircle2Icon } from "lucide-react"
 
+import { InstallNudge } from "@/components/install-nudge"
 import { bindDevice } from "@/lib/session"
 import { Alert, AlertDescription, AlertTitle } from "@workspace/ui/components/alert"
 import { Badge } from "@workspace/ui/components/badge"
@@ -44,57 +40,13 @@ function urlBase64ToUint8Array(base64String: string) {
   return outputArray
 }
 
-function getInstallHint(name: string) {
-  if (typeof navigator === "undefined") {
-    return {
-      platform: "unknown" as const,
-      title: "Add to Home Screen",
-      steps: [
-        "Stay on this connect page",
-        "Use Share / menu → Add to Home Screen",
-        `Confirm the URL is …/connect/${name}, then open the icon and enable notifications`,
-      ],
-    }
-  }
-
-  const ua = navigator.userAgent
-  const isIOS = /iPad|iPhone|iPod/.test(ua)
-  const isAndroid = /Android/.test(ua)
-
-  if (isIOS) {
-    return {
-      platform: "ios" as const,
-      title: "Add to Home Screen (iPhone)",
-      steps: [
-        "Stay on this page (do not go to the homepage)",
-        "Tap Share → Add to Home Screen",
-        `Check the URL shows /connect/${name}, then Add`,
-        "Open the icon and enable notifications below",
-      ],
-    }
-  }
-
-  if (isAndroid) {
-    return {
-      platform: "android" as const,
-      title: "Install app (Android)",
-      steps: [
-        "Stay on this connect page",
-        "Tap the browser menu (⋮) → Install app / Add to Home screen",
-        "Open the installed app, then enable notifications",
-      ],
-    }
-  }
-
-  return {
-    platform: "desktop" as const,
-    title: "Open on your phone",
-    steps: [
-      "Scan the QR from your dashboard on a phone",
-      `Add /connect/${name} to your home screen from that page`,
-      "Enable notifications from the installed app",
-    ],
-  }
+function isStandaloneApp() {
+  if (typeof window === "undefined") return false
+  const media = window.matchMedia("(display-mode: standalone)").matches
+  const iosStandalone =
+    "standalone" in navigator &&
+    Boolean((navigator as Navigator & { standalone?: boolean }).standalone)
+  return media || iosStandalone
 }
 
 function ConnectPage() {
@@ -106,41 +58,20 @@ function ConnectPage() {
   )
   const [step, setStep] = useState<StepState>("idle")
   const [message, setMessage] = useState<string | null>(null)
-  const [deferredPrompt, setDeferredPrompt] = useState<{
-    prompt: () => Promise<void>
-  } | null>(null)
   const [isStandalone, setIsStandalone] = useState(false)
-
-  const hint = useMemo(() => getInstallHint(name), [name])
 
   useEffect(() => {
     bindDevice(name)
   }, [name])
 
   useEffect(() => {
+    setIsStandalone(isStandaloneApp())
     const media = window.matchMedia("(display-mode: standalone)")
-    const navStandalone =
-      "standalone" in navigator &&
-      Boolean((navigator as Navigator & { standalone?: boolean }).standalone)
-    setIsStandalone(media.matches || navStandalone)
-
     function onChange() {
-      setIsStandalone(media.matches || navStandalone)
+      setIsStandalone(isStandaloneApp())
     }
     media.addEventListener("change", onChange)
     return () => media.removeEventListener("change", onChange)
-  }, [])
-
-  useEffect(() => {
-    function onBeforeInstall(event: Event) {
-      event.preventDefault()
-      const promptEvent = event as Event & {
-        prompt: () => Promise<void>
-      }
-      setDeferredPrompt(promptEvent)
-    }
-    window.addEventListener("beforeinstallprompt", onBeforeInstall)
-    return () => window.removeEventListener("beforeinstallprompt", onBeforeInstall)
   }, [])
 
   useEffect(() => {
@@ -252,7 +183,7 @@ function ConnectPage() {
         className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_oklch(0.93_0.05_170),_transparent_50%),linear-gradient(180deg,_oklch(0.99_0.01_170),_oklch(0.96_0.02_200))]"
       />
 
-      <main className="relative mx-auto flex min-h-svh w-full max-w-md flex-col px-6 py-10">
+      <main className="relative mx-auto flex min-h-svh w-full max-w-md flex-col px-6 py-10 pb-28">
         <div className="flex items-center justify-between">
           <Link to="/" className="font-heading text-lg font-semibold tracking-tight">
             notify.me
@@ -268,47 +199,35 @@ function ConnectPage() {
             {name}
           </h1>
           <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-            Add <span className="font-medium text-foreground">this</span> page
-            to your home screen (not the homepage), then enable notifications.
+            Install this page on your phone, then enable notifications so your
+            API can reach you.
           </p>
         </div>
 
-        <ol className="mt-8 space-y-4 animate-in fade-in slide-in-from-bottom-3 duration-700 delay-100">
-          <li className="border border-foreground/10 bg-background/70 p-4 backdrop-blur">
+        <section className="mt-8 space-y-4 animate-in fade-in slide-in-from-bottom-3 duration-700 delay-100">
+          <div className="border border-foreground/10 bg-background/70 p-4 backdrop-blur">
             <div className="flex items-center gap-2">
-              <HomeIcon className="size-4 text-primary" />
-              <h2 className="font-heading text-sm font-medium">{hint.title}</h2>
+              <h2 className="font-heading text-sm font-medium">1. Install app</h2>
               {isStandalone ? (
                 <CheckCircle2Icon className="ms-auto size-4 text-primary" />
               ) : null}
             </div>
-            <ol className="mt-3 list-decimal space-y-1.5 ps-4 text-sm text-muted-foreground">
-              {hint.steps.map((item) => (
-                <li key={item}>{item}</li>
-              ))}
-            </ol>
-            <p className="mt-3 text-xs text-muted-foreground">
-              Expected URL:{" "}
-              <code className="text-foreground">/connect/{name}</code>
-            </p>
-            {deferredPrompt ? (
-              <Button
-                type="button"
-                className="mt-4 w-full"
-                variant="outline"
-                onClick={() => void deferredPrompt.prompt()}
-              >
-                <ShareIcon data-icon="inline-start" />
-                Install notify.me
-              </Button>
-            ) : null}
-          </li>
+            {isStandalone ? (
+              <p className="mt-3 text-sm text-muted-foreground">
+                Running as an installed app. Next: enable notifications.
+              </p>
+            ) : (
+              <div className="mt-4">
+                <InstallNudge name={name} />
+              </div>
+            )}
+          </div>
 
-          <li className="border border-foreground/10 bg-background/70 p-4 backdrop-blur">
+          <div className="border border-foreground/10 bg-background/70 p-4 backdrop-blur">
             <div className="flex items-center gap-2">
               <BellIcon className="size-4 text-primary" />
               <h2 className="font-heading text-sm font-medium">
-                Enable notifications
+                2. Enable notifications
               </h2>
               {permission === "granted" && connected ? (
                 <CheckCircle2Icon className="ms-auto size-4 text-primary" />
@@ -330,8 +249,8 @@ function ConnectPage() {
                   ? "Reconnect notifications"
                   : "Enable notifications"}
             </Button>
-          </li>
-        </ol>
+          </div>
+        </section>
 
         {message ? (
           <Alert
