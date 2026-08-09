@@ -249,73 +249,47 @@ function ConnectPage() {
           </p>
         </section>
 
-        <section className="mt-10 flex flex-1 flex-col animate-in fade-in slide-in-from-bottom-3 duration-600 delay-75">
-          <div className="rounded-[1.75rem] border border-border/60 bg-card/80 p-5 shadow-[0_20px_50px_-34px_rgba(36,58,46,0.35)] backdrop-blur-sm">
-            <div className="flex items-start gap-3">
-              <div className="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-                {phase === "done" ? (
-                  <CheckCircle2Icon className="size-5" />
-                ) : phase === "notify" ? (
-                  <BellRingIcon className="size-5" />
-                ) : (
-                  <HomeIcon className="size-5" />
-                )}
+        <section className="mt-auto flex flex-col gap-4 pb-2 pt-12 animate-in fade-in slide-in-from-bottom-3 duration-600 delay-75">
+          {phase === "install" ? <InstallNudge name={name} /> : null}
+
+          {phase === "notify" ? (
+            <Button
+              type="button"
+              size="lg"
+              className="h-14 w-full"
+              onClick={() => void enableNotifications()}
+              disabled={step === "working"}
+            >
+              <BellRingIcon data-icon="inline-start" />
+              {step === "working" ? "Enabling…" : "Enable notifications"}
+            </Button>
+          ) : null}
+
+          {phase === "done" ? (
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 text-primary">
+                <CheckCircle2Icon className="size-5" />
+                <p className="text-sm font-medium">Connected to {name}</p>
               </div>
-              <div className="min-w-0 flex-1">
-                <p className="font-heading text-lg font-medium tracking-tight">
-                  {phase === "install"
-                    ? "Install"
-                    : phase === "notify"
-                      ? "Notifications"
-                      : "Ready"}
-                </p>
-                <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
-                  {phase === "install"
-                    ? "One tap installs this connect page as an app."
-                    : phase === "notify"
-                      ? "We only ask when you’re ready to enable."
-                      : "Your dashboard can send tests and API pushes."}
-                </p>
-              </div>
+              <Button
+                type="button"
+                variant="outline"
+                size="lg"
+                className="h-13 w-full"
+                onClick={() => void enableNotifications()}
+                disabled={step === "working"}
+              >
+                {step === "working" ? "Reconnecting…" : "Reconnect"}
+              </Button>
             </div>
-
-            <div className="mt-6">
-              {phase === "install" ? <InstallNudge name={name} /> : null}
-
-              {phase === "notify" ? (
-                <Button
-                  type="button"
-                  size="lg"
-                  className="h-13 w-full"
-                  onClick={() => void enableNotifications()}
-                  disabled={step === "working"}
-                >
-                  <BellRingIcon data-icon="inline-start" />
-                  {step === "working" ? "Enabling…" : "Enable notifications"}
-                </Button>
-              ) : null}
-
-              {phase === "done" ? (
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="lg"
-                  className="h-13 w-full"
-                  onClick={() => void enableNotifications()}
-                  disabled={step === "working"}
-                >
-                  {step === "working" ? "Reconnecting…" : "Reconnect"}
-                </Button>
-              ) : null}
-            </div>
-          </div>
+          ) : null}
 
           {message ? (
             <p
               className={
                 step === "error"
-                  ? "mt-5 text-sm text-destructive"
-                  : "mt-5 text-sm text-muted-foreground"
+                  ? "text-sm text-destructive"
+                  : "text-sm text-muted-foreground"
               }
               role="status"
             >
@@ -323,10 +297,6 @@ function ConnectPage() {
             </p>
           ) : null}
         </section>
-
-        <p className="mt-auto pt-10 text-center text-xs leading-relaxed text-muted-foreground">
-          Manage the API later from your dashboard.
-        </p>
       </main>
     </AppShell>
   )

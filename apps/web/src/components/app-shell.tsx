@@ -62,15 +62,16 @@ export function SoftStatus({
       className={cn(
         "inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium tracking-wide",
         tone === "ready" && "bg-primary/12 text-primary",
-        tone === "idle" && "bg-secondary text-secondary-foreground",
+        tone === "idle" && "bg-secondary/90 text-secondary-foreground",
         tone === "warn" && "bg-accent text-accent-foreground"
       )}
     >
       <span
+        aria-hidden
         className={cn(
           "size-1.5 rounded-full",
           tone === "ready" && "bg-primary",
-          tone === "idle" && "bg-muted-foreground/50",
+          tone === "idle" && "bg-muted-foreground/45",
           tone === "warn" && "bg-accent-foreground/70"
         )}
       />
