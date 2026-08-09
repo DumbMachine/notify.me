@@ -16,14 +16,14 @@ export type Channel = {
 
 const channels = new Map<string, Channel>()
 
-const NAME_RE = /^[a-z0-9]([a-z0-9-]{1,30}[a-z0-9])?$/
+const NAME_RE = /^[a-z0-9](?:[a-z0-9-]{0,30}[a-z0-9])?$/
 
 export function normalizeName(raw: string): string {
   return raw.trim().toLowerCase()
 }
 
 export function isValidName(name: string): boolean {
-  return NAME_RE.test(name)
+  return name.length >= 3 && name.length <= 32 && NAME_RE.test(name)
 }
 
 export function generateApiKey(): string {

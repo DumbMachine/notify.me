@@ -109,7 +109,7 @@ function HomePage() {
                 required
                 minLength={3}
                 maxLength={32}
-                pattern="[a-z0-9]([a-z0-9-]{1,30}[a-z0-9])?"
+                pattern="[a-z0-9][a-z0-9-]*[a-z0-9]"
               />
             </div>
             <Button
