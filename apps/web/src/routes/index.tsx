@@ -1,15 +1,24 @@
 import { useEffect, useState, type FormEvent } from "react"
 import { createFileRoute, useNavigate } from "@tanstack/react-router"
-import { ArrowRightIcon } from "lucide-react"
+import { ArrowRightIcon, KeyRoundIcon, SparklesIcon } from "lucide-react"
 
+import { AppShell, BrandMark } from "@/components/app-shell"
 import {
   getBoundDevice,
   getLastName,
   saveCreds,
 } from "@/lib/session"
+import {
+  BottomSheet,
+  BottomSheetBody,
+  BottomSheetContent,
+  BottomSheetDescription,
+  BottomSheetFooter,
+  BottomSheetHeader,
+  BottomSheetTitle,
+} from "@workspace/ui/components/bottom-sheet"
 import { Button } from "@workspace/ui/components/button"
 import { Input } from "@workspace/ui/components/input"
-import { cn } from "@workspace/ui/lib/utils"
 
 export const Route = createFileRoute("/")({ component: HomePage })
 
@@ -23,6 +32,8 @@ type SessionResponse = {
   error?: string
 }
 
+type SheetMode = "claim" | "login" | null
+
 function isStandaloneDisplay() {
   if (typeof window === "undefined") return false
   const media = window.matchMedia("(display-mode: standalone)").matches
@@ -32,9 +43,43 @@ function isStandaloneDisplay() {
   return media || iosStandalone
 }
 
+function NameField({
+  id,
+  value,
+  onChange,
+}: {
+  id: string
+  value: string
+  onChange: (value: string) => void
+}) {
+  return (
+    <div className="relative">
+      <span className="pointer-events-none absolute inset-y-0 start-4 flex items-center text-sm text-muted-foreground">
+        notify.me/
+      </span>
+      <Input
+        id={id}
+        name="name"
+        autoComplete="username"
+        autoCapitalize="none"
+        autoCorrect="off"
+        spellCheck={false}
+        placeholder="alex"
+        value={value}
+        onChange={(e) => onChange(e.target.value.toLowerCase())}
+        className="h-13 border-border/80 bg-background/80 pe-4 ps-[5.9rem] text-base"
+        required
+        minLength={3}
+        maxLength={32}
+        pattern="[a-z0-9][a-z0-9-]*[a-z0-9]"
+      />
+    </div>
+  )
+}
+
 function HomePage() {
   const navigate = useNavigate()
-  const [mode, setMode] = useState<"claim" | "login">("claim")
+  const [sheet, setSheet] = useState<SheetMode>(null)
   const [name, setName] = useState("")
   const [apiKey, setApiKey] = useState("")
   const [error, setError] = useState<string | null>(null)
@@ -48,9 +93,18 @@ function HomePage() {
     if (last) setName((current) => current || last)
 
     if (bound && isStandaloneDisplay()) {
-      void navigate({ to: "/connect/$name", params: { name: bound }, replace: true })
+      void navigate({
+        to: "/connect/$name",
+        params: { name: bound },
+        replace: true,
+      })
     }
   }, [navigate])
+
+  function openSheet(mode: SheetMode) {
+    setError(null)
+    setSheet(mode)
+  }
 
   async function persistAndGo(data: SessionResponse) {
     saveCreds(data.name, {
@@ -58,6 +112,7 @@ function HomePage() {
       notifyUrl: data.notifyUrl,
       connectUrl: data.connectUrl,
     })
+    setSheet(null)
     await navigate({ to: "/$name", params: { name: data.name } })
   }
 
@@ -108,23 +163,17 @@ function HomePage() {
   }
 
   return (
-    <div className="relative min-h-svh">
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_20%_0%,_oklch(0.93_0.05_170)_0%,_transparent_45%),linear-gradient(180deg,_oklch(0.99_0.01_170),_oklch(0.97_0.02_200))]"
-      />
-
-      <main className="relative mx-auto flex min-h-svh w-full max-w-md flex-col px-5 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-[max(2.5rem,env(safe-area-inset-top))] sm:justify-center sm:px-6">
-        <div className="animate-in fade-in slide-in-from-bottom-2 duration-500">
-          <h1 className="font-heading text-[2.75rem] leading-none font-semibold tracking-tight sm:text-6xl">
-            notify.me
-          </h1>
-          <p className="mt-4 max-w-[22rem] text-[15px] leading-relaxed text-muted-foreground">
-            Claim a name. Connect your phone. Push to it with one API call.
+    <AppShell>
+      <div className="flex flex-1 flex-col">
+        <div className="pt-10 animate-in fade-in slide-in-from-bottom-3 duration-700">
+          <BrandMark size="hero" className="block" />
+          <p className="mt-5 max-w-[18rem] text-[17px] leading-relaxed text-muted-foreground">
+            A quiet little name for your phone. Claim it, connect once, notify
+            forever.
           </p>
         </div>
 
-        <div className="mt-10 flex flex-1 flex-col gap-5 sm:mt-12 sm:flex-none">
+        <div className="mt-auto flex flex-col gap-3 pt-16 pb-2 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-100">
           {deviceName ? (
             <button
               type="button"
@@ -134,123 +183,129 @@ function HomePage() {
                   params: { name: deviceName },
                 })
               }
-              className="flex h-12 items-center justify-between gap-3 border border-foreground/10 bg-background/70 px-4 text-start text-sm backdrop-blur transition-colors hover:bg-background"
+              className="flex h-13 items-center justify-between gap-3 rounded-2xl border border-border/70 bg-card/80 px-4 text-start shadow-[0_12px_40px_-28px_rgba(36,58,46,0.45)] backdrop-blur-sm transition-colors hover:bg-card"
             >
-              <span className="text-muted-foreground">Continue as</span>
+              <span className="text-sm text-muted-foreground">Continue as</span>
               <span className="flex items-center gap-2 font-medium">
                 {deviceName}
-                <ArrowRightIcon className="size-4" />
+                <ArrowRightIcon className="size-4 opacity-60" />
               </span>
             </button>
           ) : null}
 
-          <div className="grid grid-cols-2 gap-1 bg-foreground/5 p-1">
-            {(["claim", "login"] as const).map((value) => (
-              <button
-                key={value}
-                type="button"
-                onClick={() => {
-                  setMode(value)
-                  setError(null)
-                }}
-                className={cn(
-                  "h-10 text-sm transition-colors",
-                  mode === value
-                    ? "bg-background font-medium text-foreground shadow-sm"
-                    : "text-muted-foreground"
-                )}
-              >
-                {value === "claim" ? "New name" : "Open existing"}
-              </button>
-            ))}
-          </div>
+          <Button
+            type="button"
+            size="lg"
+            className="h-14 w-full text-[15px]"
+            onClick={() => openSheet("claim")}
+          >
+            <SparklesIcon data-icon="inline-start" />
+            Claim a name
+          </Button>
 
-          {mode === "claim" ? (
-            <form onSubmit={onClaim} className="space-y-3">
-              <div className="relative">
-                <span className="pointer-events-none absolute inset-y-0 start-3 flex items-center text-sm text-muted-foreground">
-                  notify.me/
-                </span>
-                <Input
-                  id="name"
-                  name="name"
-                  autoComplete="off"
-                  autoCapitalize="none"
-                  autoCorrect="off"
-                  spellCheck={false}
-                  placeholder="alex"
-                  value={name}
-                  onChange={(e) => setName(e.target.value.toLowerCase())}
-                  className="h-12 border-foreground/15 pe-3 ps-[5.75rem] text-base md:text-sm"
-                  required
-                  minLength={3}
-                  maxLength={32}
-                  pattern="[a-z0-9][a-z0-9-]*[a-z0-9]"
-                />
-              </div>
+          <Button
+            type="button"
+            variant="ghost"
+            size="lg"
+            className="h-12 w-full text-muted-foreground"
+            onClick={() => openSheet("login")}
+          >
+            <KeyRoundIcon data-icon="inline-start" />
+            I already have one
+          </Button>
+        </div>
+      </div>
+
+      <BottomSheet
+        open={sheet === "claim"}
+        onOpenChange={(open) => {
+          if (!open) setSheet(null)
+        }}
+      >
+        <BottomSheetContent>
+          <form onSubmit={onClaim}>
+            <BottomSheetHeader>
+              <BottomSheetTitle>Claim your name</BottomSheetTitle>
+              <BottomSheetDescription>
+                Pick something short and yours. This becomes your notify URL.
+              </BottomSheetDescription>
+            </BottomSheetHeader>
+            <BottomSheetBody>
+              <NameField id="claim-name" value={name} onChange={setName} />
+              {error && sheet === "claim" ? (
+                <p className="text-sm text-destructive" role="alert">
+                  {error}
+                </p>
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  Demo storage may reset — keep your API key nearby.
+                </p>
+              )}
+            </BottomSheetBody>
+            <BottomSheetFooter>
               <Button
                 type="submit"
-                className="h-12 w-full text-sm"
+                size="lg"
+                className="h-13 w-full"
                 disabled={pending || name.trim().length < 3}
               >
-                {pending ? "Claiming…" : "Claim name"}
+                {pending ? "Claiming…" : "Continue"}
                 <ArrowRightIcon data-icon="inline-end" />
               </Button>
-            </form>
-          ) : (
-            <form onSubmit={onLogin} className="space-y-3">
-              <div className="relative">
-                <span className="pointer-events-none absolute inset-y-0 start-3 flex items-center text-sm text-muted-foreground">
-                  notify.me/
-                </span>
-                <Input
-                  id="login-name"
-                  autoComplete="username"
-                  autoCapitalize="none"
-                  spellCheck={false}
-                  value={name}
-                  onChange={(e) => setName(e.target.value.toLowerCase())}
-                  className="h-12 border-foreground/15 pe-3 ps-[5.75rem] text-base md:text-sm"
-                  required
-                  minLength={3}
-                  maxLength={32}
-                />
-              </div>
+            </BottomSheetFooter>
+          </form>
+        </BottomSheetContent>
+      </BottomSheet>
+
+      <BottomSheet
+        open={sheet === "login"}
+        onOpenChange={(open) => {
+          if (!open) setSheet(null)
+        }}
+      >
+        <BottomSheetContent>
+          <form onSubmit={onLogin}>
+            <BottomSheetHeader>
+              <BottomSheetTitle>Welcome back</BottomSheetTitle>
+              <BottomSheetDescription>
+                Open your dashboard with your name and API key.
+              </BottomSheetDescription>
+            </BottomSheetHeader>
+            <BottomSheetBody>
+              <NameField id="login-name" value={name} onChange={setName} />
               <Input
                 id="api-key"
                 type="password"
                 autoComplete="current-password"
                 value={apiKey}
                 onChange={(e) => setApiKey(e.target.value.trim())}
-                className="h-12 border-foreground/15 text-base md:text-sm"
+                className="h-13 border-border/80 bg-background/80 text-base"
                 required
                 minLength={16}
                 placeholder="API key"
               />
+              {error && sheet === "login" ? (
+                <p className="text-sm text-destructive" role="alert">
+                  {error}
+                </p>
+              ) : null}
+            </BottomSheetBody>
+            <BottomSheetFooter>
               <Button
                 type="submit"
-                className="h-12 w-full text-sm"
-                disabled={pending || name.trim().length < 3 || apiKey.length < 16}
+                size="lg"
+                className="h-13 w-full"
+                disabled={
+                  pending || name.trim().length < 3 || apiKey.length < 16
+                }
               >
                 {pending ? "Opening…" : "Open dashboard"}
                 <ArrowRightIcon data-icon="inline-end" />
               </Button>
-            </form>
-          )}
-
-          {error ? (
-            <p className="text-sm text-destructive" role="alert">
-              {error}
-            </p>
-          ) : (
-            <p className="text-xs leading-relaxed text-muted-foreground">
-              {mode === "claim"
-                ? "Names are temporary while storage is in-memory / demo-backed."
-                : "Use your name and API key to get the QR and endpoint again."}
-            </p>
-          )}
-        </div>
-      </main>
-    </div>
+            </BottomSheetFooter>
+          </form>
+        </BottomSheetContent>
+      </BottomSheet>
+    </AppShell>
   )
 }

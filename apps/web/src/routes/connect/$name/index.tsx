@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react"
 import { createFileRoute, Link } from "@tanstack/react-router"
-import { CheckCircle2Icon } from "lucide-react"
+import { BellRingIcon, CheckCircle2Icon, HomeIcon } from "lucide-react"
 
+import { AppShell, ScreenHeader, SoftStatus } from "@/components/app-shell"
 import { InstallNudge } from "@/components/install-nudge"
 import { bindDevice } from "@/lib/session"
-import { Badge } from "@workspace/ui/components/badge"
 import { Button } from "@workspace/ui/components/button"
 
 export const Route = createFileRoute("/connect/$name/")({
@@ -17,10 +17,6 @@ export const Route = createFileRoute("/connect/$name/")({
       { title: `Connect · ${params.name} · notify.me` },
       { name: "apple-mobile-web-app-capable", content: "yes" },
       { name: "mobile-web-app-capable", content: "yes" },
-      {
-        name: "apple-mobile-web-app-title",
-        content: `notify.me/${params.name}`,
-      },
     ],
     links: [
       {
@@ -187,7 +183,7 @@ function ConnectPage() {
       bindDevice(name)
       setConnected(true)
       setStep("done")
-      setMessage("Connected. Your dashboard should update in a moment.")
+      setMessage("You’re connected. Pushes will land here.")
     } catch (error) {
       setStep("error")
       setMessage(error instanceof Error ? error.message : "Something went wrong.")
@@ -196,114 +192,142 @@ function ConnectPage() {
 
   if (channelOk === false) {
     return (
-      <main className="mx-auto flex min-h-svh max-w-md flex-col justify-center gap-4 px-5">
-        <h1 className="font-heading text-3xl font-semibold tracking-tight">
-          Link expired
-        </h1>
-        <p className="text-sm leading-relaxed text-muted-foreground">
-          Open the QR from your dashboard again, or use{" "}
-          <span className="text-foreground">Open existing</span> on the homepage.
-        </p>
-        <Button nativeButton={false} className="h-12" render={<Link to="/" />}>
-          Back to notify.me
-        </Button>
-      </main>
+      <AppShell>
+        <div className="flex flex-1 flex-col justify-center gap-5 py-10 animate-in fade-in slide-in-from-bottom-2 duration-500">
+          <h1 className="font-heading text-4xl font-medium tracking-tight">
+            Link expired
+          </h1>
+          <p className="max-w-[20rem] text-[15px] leading-relaxed text-muted-foreground">
+            Scan the QR from your dashboard again, or open your name from the
+            homepage.
+          </p>
+          <Button
+            nativeButton={false}
+            size="lg"
+            className="mt-4 h-13"
+            render={<Link to="/" />}
+          >
+            <HomeIcon data-icon="inline-start" />
+            Back to notify.me
+          </Button>
+        </div>
+      </AppShell>
     )
   }
 
   const notificationsReady = permission === "granted" && connected
+  const phase: "install" | "notify" | "done" = notificationsReady
+    ? "done"
+    : isStandalone
+      ? "notify"
+      : "install"
 
   return (
-    <div className="relative min-h-svh">
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_oklch(0.93_0.05_170),_transparent_50%),linear-gradient(180deg,_oklch(0.99_0.01_170),_oklch(0.96_0.02_200))]"
-      />
-
-      <main className="relative mx-auto flex min-h-svh w-full max-w-md flex-col px-5 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-[max(1rem,env(safe-area-inset-top))]">
-        <header className="flex items-center justify-between py-4">
-          <Link to="/" className="font-heading text-lg font-semibold tracking-tight">
-            notify.me
-          </Link>
-          <Badge variant={connected ? "default" : "secondary"}>
-            {connected ? "Connected" : "Setup"}
-          </Badge>
-        </header>
-
-        <div className="mt-4 animate-in fade-in slide-in-from-bottom-2 duration-500">
+    <AppShell
+      header={
+        <ScreenHeader
+          trailing={
+            <SoftStatus tone={connected ? "ready" : "idle"}>
+              {connected ? "Connected" : "Setup"}
+            </SoftStatus>
+          }
+        />
+      }
+    >
+      <main className="flex flex-1 flex-col">
+        <section className="pt-4 animate-in fade-in slide-in-from-bottom-2 duration-500">
           <p className="text-sm text-muted-foreground">Phone setup</p>
-          <h1 className="mt-1 font-heading text-4xl font-semibold tracking-tight">
+          <h1 className="mt-1 font-heading text-4xl font-medium tracking-tight">
             {name}
           </h1>
-          <p className="mt-3 text-[15px] leading-relaxed text-muted-foreground">
-            Two steps. Install this page, then allow notifications.
+          <p className="mt-3 max-w-[20rem] text-[15px] leading-relaxed text-muted-foreground">
+            {phase === "install"
+              ? "Add this page to your home screen first."
+              : phase === "notify"
+                ? "Allow notifications so pushes can arrive."
+                : "All set. Keep this app for quiet little pings."}
           </p>
-        </div>
+        </section>
 
-        <ol className="mt-10 space-y-8 animate-in fade-in slide-in-from-bottom-3 duration-700 delay-75">
-          <li>
-            <div className="mb-3 flex items-center gap-2">
-              <span className="flex size-6 items-center justify-center bg-primary/10 text-xs font-medium text-primary">
-                1
-              </span>
-              <h2 className="font-heading text-base font-medium">Install</h2>
-              {isStandalone ? (
-                <CheckCircle2Icon className="ms-auto size-4 text-primary" />
+        <section className="mt-10 flex flex-1 flex-col animate-in fade-in slide-in-from-bottom-3 duration-600 delay-75">
+          <div className="rounded-[1.75rem] border border-border/60 bg-card/80 p-5 shadow-[0_20px_50px_-34px_rgba(36,58,46,0.35)] backdrop-blur-sm">
+            <div className="flex items-start gap-3">
+              <div className="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                {phase === "done" ? (
+                  <CheckCircle2Icon className="size-5" />
+                ) : phase === "notify" ? (
+                  <BellRingIcon className="size-5" />
+                ) : (
+                  <HomeIcon className="size-5" />
+                )}
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="font-heading text-lg font-medium tracking-tight">
+                  {phase === "install"
+                    ? "Install"
+                    : phase === "notify"
+                      ? "Notifications"
+                      : "Ready"}
+                </p>
+                <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
+                  {phase === "install"
+                    ? "One tap installs this connect page as an app."
+                    : phase === "notify"
+                      ? "We only ask when you’re ready to enable."
+                      : "Your dashboard can send tests and API pushes."}
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-6">
+              {phase === "install" ? <InstallNudge name={name} /> : null}
+
+              {phase === "notify" ? (
+                <Button
+                  type="button"
+                  size="lg"
+                  className="h-13 w-full"
+                  onClick={() => void enableNotifications()}
+                  disabled={step === "working"}
+                >
+                  <BellRingIcon data-icon="inline-start" />
+                  {step === "working" ? "Enabling…" : "Enable notifications"}
+                </Button>
+              ) : null}
+
+              {phase === "done" ? (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="lg"
+                  className="h-13 w-full"
+                  onClick={() => void enableNotifications()}
+                  disabled={step === "working"}
+                >
+                  {step === "working" ? "Reconnecting…" : "Reconnect"}
+                </Button>
               ) : null}
             </div>
-            {isStandalone ? (
-              <p className="text-sm text-muted-foreground">
-                Installed. Continue below.
-              </p>
-            ) : (
-              <InstallNudge name={name} />
-            )}
-          </li>
+          </div>
 
-          <li>
-            <div className="mb-3 flex items-center gap-2">
-              <span className="flex size-6 items-center justify-center bg-primary/10 text-xs font-medium text-primary">
-                2
-              </span>
-              <h2 className="font-heading text-base font-medium">Notifications</h2>
-              {notificationsReady ? (
-                <CheckCircle2Icon className="ms-auto size-4 text-primary" />
-              ) : null}
-            </div>
-            <Button
-              type="button"
-              className="h-12 w-full"
-              onClick={() => void enableNotifications()}
-              disabled={step === "working"}
-              variant={notificationsReady ? "outline" : "default"}
+          {message ? (
+            <p
+              className={
+                step === "error"
+                  ? "mt-5 text-sm text-destructive"
+                  : "mt-5 text-sm text-muted-foreground"
+              }
+              role="status"
             >
-              {step === "working"
-                ? "Enabling…"
-                : notificationsReady
-                  ? "Reconnect"
-                  : "Enable notifications"}
-            </Button>
-          </li>
-        </ol>
+              {message}
+            </p>
+          ) : null}
+        </section>
 
-        {message ? (
-          <p
-            className={
-              step === "error"
-                ? "mt-6 text-sm text-destructive"
-                : "mt-6 text-sm text-muted-foreground"
-            }
-            role="status"
-          >
-            {message}
-          </p>
-        ) : null}
-
-        <p className="mt-auto pt-12 text-center text-xs text-muted-foreground">
-          Manage the API later with{" "}
-          <span className="text-foreground">Open existing</span>.
+        <p className="mt-auto pt-10 text-center text-xs leading-relaxed text-muted-foreground">
+          Manage the API later from your dashboard.
         </p>
       </main>
-    </div>
+    </AppShell>
   )
 }

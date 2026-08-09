@@ -1,6 +1,15 @@
-import { useEffect, useId, useState } from "react"
-import { DownloadIcon, ShareIcon, SquarePlusIcon, XIcon } from "lucide-react"
+import { useEffect, useState, type ReactNode } from "react"
+import { DownloadIcon, ShareIcon, SquarePlusIcon } from "lucide-react"
 
+import {
+  BottomSheet,
+  BottomSheetBody,
+  BottomSheetContent,
+  BottomSheetDescription,
+  BottomSheetFooter,
+  BottomSheetHeader,
+  BottomSheetTitle,
+} from "@workspace/ui/components/bottom-sheet"
 import { Button } from "@workspace/ui/components/button"
 import { cn } from "@workspace/ui/lib/utils"
 
@@ -28,6 +37,23 @@ function isStandaloneApp() {
   return media || iosStandalone
 }
 
+function Step({
+  n,
+  children,
+}: {
+  n: number
+  children: ReactNode
+}) {
+  return (
+    <li className="flex gap-3">
+      <span className="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-medium text-primary">
+        {n}
+      </span>
+      <p className="text-[15px] leading-relaxed">{children}</p>
+    </li>
+  )
+}
+
 export function InstallNudge({
   name,
   className,
@@ -35,7 +61,6 @@ export function InstallNudge({
   name: string
   className?: string
 }) {
-  const titleId = useId()
   const [platform] = useState<Platform>(() => detectPlatform())
   const [standalone, setStandalone] = useState(false)
   const [deferredPrompt, setDeferredPrompt] =
@@ -91,7 +116,8 @@ export function InstallNudge({
       <div className={cn("space-y-2", className)}>
         <Button
           type="button"
-          className="h-12 w-full"
+          size="lg"
+          className="h-13 w-full"
           onClick={() => void onInstallClick()}
           disabled={installing}
         >
@@ -109,103 +135,53 @@ export function InstallNudge({
         </p>
       </div>
 
-      {showGuide ? (
-        <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center">
-          <button
-            type="button"
-            aria-label="Close"
-            className="absolute inset-0 bg-foreground/35"
-            onClick={() => setShowGuide(false)}
-          />
-          <div
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby={titleId}
-            className="relative z-10 w-full max-w-md animate-in fade-in slide-in-from-bottom-4 bg-background px-5 pt-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] shadow-xl duration-300 sm:border sm:border-foreground/10"
-          >
-            <div className="mb-1 flex items-start justify-between gap-3">
-              <h2 id={titleId} className="font-heading text-lg font-medium">
-                {platform === "ios" ? "Add to Home Screen" : "Install"}
-              </h2>
-              <Button
-                type="button"
-                size="icon"
-                variant="ghost"
-                onClick={() => setShowGuide(false)}
-              >
-                <XIcon />
-              </Button>
-            </div>
-            <p className="text-sm text-muted-foreground">
+      <BottomSheet open={showGuide} onOpenChange={setShowGuide}>
+        <BottomSheetContent>
+          <BottomSheetHeader>
+            <BottomSheetTitle>
+              {platform === "ios" ? "Add to Home Screen" : "Install"}
+            </BottomSheetTitle>
+            <BottomSheetDescription>
               Stay on this page so it opens{" "}
               <span className="text-foreground">/connect/{name}</span>.
-            </p>
-
-            <ol className="mt-5 space-y-4 text-[15px] leading-relaxed">
+            </BottomSheetDescription>
+          </BottomSheetHeader>
+          <BottomSheetBody>
+            <ol className="space-y-4">
               {platform === "ios" ? (
                 <>
-                  <li className="flex gap-3">
-                    <span className="mt-0.5 flex size-6 shrink-0 items-center justify-center bg-primary/10 text-xs font-medium text-primary">
-                      1
-                    </span>
-                    <p>
-                      Tap{" "}
-                      <ShareIcon className="inline size-3.5 align-text-top" />{" "}
-                      <span className="font-medium">Share</span> in Safari.
-                    </p>
-                  </li>
-                  <li className="flex gap-3">
-                    <span className="mt-0.5 flex size-6 shrink-0 items-center justify-center bg-primary/10 text-xs font-medium text-primary">
-                      2
-                    </span>
-                    <p>
-                      Choose{" "}
-                      <SquarePlusIcon className="inline size-3.5 align-text-top" />{" "}
-                      <span className="font-medium">Add to Home Screen</span>.
-                    </p>
-                  </li>
-                  <li className="flex gap-3">
-                    <span className="mt-0.5 flex size-6 shrink-0 items-center justify-center bg-primary/10 text-xs font-medium text-primary">
-                      3
-                    </span>
-                    <p>
-                      Tap <span className="font-medium">Add</span>, open the
-                      icon, then enable notifications.
-                    </p>
-                  </li>
+                  <Step n={1}>
+                    Tap{" "}
+                    <ShareIcon className="inline size-3.5 align-text-top" />{" "}
+                    <span className="font-medium">Share</span> in Safari.
+                  </Step>
+                  <Step n={2}>
+                    Choose{" "}
+                    <SquarePlusIcon className="inline size-3.5 align-text-top" />{" "}
+                    <span className="font-medium">Add to Home Screen</span>.
+                  </Step>
+                  <Step n={3}>
+                    Tap <span className="font-medium">Add</span>, open the icon,
+                    then enable notifications.
+                  </Step>
                 </>
               ) : (
                 <>
-                  <li className="flex gap-3">
-                    <span className="mt-0.5 flex size-6 shrink-0 items-center justify-center bg-primary/10 text-xs font-medium text-primary">
-                      1
-                    </span>
-                    <p>
-                      Open the browser menu{" "}
-                      <span className="font-medium">(⋮)</span>.
-                    </p>
-                  </li>
-                  <li className="flex gap-3">
-                    <span className="mt-0.5 flex size-6 shrink-0 items-center justify-center bg-primary/10 text-xs font-medium text-primary">
-                      2
-                    </span>
-                    <p>
-                      Tap <span className="font-medium">Install app</span> or{" "}
-                      <span className="font-medium">Add to Home screen</span>.
-                    </p>
-                  </li>
-                  <li className="flex gap-3">
-                    <span className="mt-0.5 flex size-6 shrink-0 items-center justify-center bg-primary/10 text-xs font-medium text-primary">
-                      3
-                    </span>
-                    <p>Open it, then enable notifications.</p>
-                  </li>
+                  <Step n={1}>
+                    Open the browser menu{" "}
+                    <span className="font-medium">(⋮)</span>.
+                  </Step>
+                  <Step n={2}>
+                    Tap <span className="font-medium">Install app</span> or{" "}
+                    <span className="font-medium">Add to Home screen</span>.
+                  </Step>
+                  <Step n={3}>Open it, then enable notifications.</Step>
                 </>
               )}
             </ol>
 
             {platform === "ios" ? (
-              <div className="pointer-events-none mt-6 flex justify-center text-primary">
+              <div className="pointer-events-none mt-2 flex justify-center text-primary">
                 <div className="animate-bounce text-center">
                   <ShareIcon className="mx-auto size-5" />
                   <p className="mt-1 text-[10px] tracking-[0.14em] uppercase">
@@ -214,18 +190,20 @@ export function InstallNudge({
                 </div>
               </div>
             ) : null}
-
+          </BottomSheetBody>
+          <BottomSheetFooter>
             <Button
               type="button"
-              className="mt-6 h-12 w-full"
-              variant="outline"
+              variant="secondary"
+              size="lg"
+              className="h-13 w-full"
               onClick={() => setShowGuide(false)}
             >
               Got it
             </Button>
-          </div>
-        </div>
-      ) : null}
+          </BottomSheetFooter>
+        </BottomSheetContent>
+      </BottomSheet>
     </>
   )
 }
