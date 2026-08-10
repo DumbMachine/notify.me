@@ -37,6 +37,8 @@ export const Route = createFileRoute("/connect/$name/")({
       { title: `${params.name} · notify.me` },
       { name: "apple-mobile-web-app-capable", content: "yes" },
       { name: "mobile-web-app-capable", content: "yes" },
+      { name: "apple-mobile-web-app-title", content: "Notify.me" },
+      { name: "application-name", content: "Notify.me" },
       { name: "theme-color", content: "#000000" },
       {
         name: "apple-mobile-web-app-status-bar-style",
