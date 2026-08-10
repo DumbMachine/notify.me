@@ -13,7 +13,13 @@ export type NotificationEntry = {
   id: string
   title: string
   body: string
+  /** Optional external link opened from the rich detail view. */
   url?: string
+  /** Small avatar / brand image. */
+  imageUrl?: string
+  /** Rich attachment (screenshot / poster / video). */
+  mediaUrl?: string
+  mediaType?: "image" | "video"
   createdAt: number
   delivered: boolean
 }
@@ -271,6 +277,9 @@ export async function appendNotification(
     title: entry.title,
     body: entry.body,
     url: entry.url,
+    imageUrl: entry.imageUrl,
+    mediaUrl: entry.mediaUrl,
+    mediaType: entry.mediaType,
     createdAt: entry.createdAt ?? Date.now(),
     delivered: entry.delivered,
   }

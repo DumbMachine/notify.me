@@ -68,6 +68,7 @@ function DashboardPage() {
   const [status, setStatus] = useState<ChannelStatus | null>(null)
   const [testTitle, setTestTitle] = useState("Hello from notify.me")
   const [testBody, setTestBody] = useState("Your phone is connected.")
+  const [testMediaUrl, setTestMediaUrl] = useState("")
   const [testResult, setTestResult] = useState<string | null>(null)
   const [testing, setTesting] = useState(false)
   const [sheet, setSheet] = useState<SheetMode>(null)
@@ -118,8 +119,8 @@ function DashboardPage() {
   }, [name])
 
   const curlExample = creds
-    ? `curl -X POST '${notifyUrl}' \\\n  -H 'Authorization: Bearer ${creds.apiKey}' \\\n  -H 'Content-Type: application/json' \\\n  -d '{"title":"Hello","body":"From your API"}'`
-    : `curl -X POST '${notifyUrl}' \\\n  -H 'Authorization: Bearer YOUR_API_KEY' \\\n  -H 'Content-Type: application/json' \\\n  -d '{"title":"Hello","body":"From your API"}'`
+    ? `curl -X POST '${notifyUrl}' \\\n  -H 'Authorization: Bearer ${creds.apiKey}' \\\n  -H 'Content-Type: application/json' \\\n  -d '{"title":"Deploy finished","body":"Production is live.","mediaUrl":"https://picsum.photos/800/500","mediaType":"image","url":"https://example.com"}'`
+    : `curl -X POST '${notifyUrl}' \\\n  -H 'Authorization: Bearer YOUR_API_KEY' \\\n  -H 'Content-Type: application/json' \\\n  -d '{"title":"Deploy finished","body":"Production is live.","mediaUrl":"https://picsum.photos/800/500","mediaType":"image"}'`
 
   async function onUnlock(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -165,7 +166,18 @@ function DashboardPage() {
           Authorization: `Bearer ${creds.apiKey}`,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ title: testTitle, body: testBody }),
+        body: JSON.stringify({
+          title: testTitle,
+          body: testBody,
+          ...(testMediaUrl.trim()
+            ? {
+                mediaUrl: testMediaUrl.trim(),
+                mediaType: /\.(mp4|webm|mov)(\?|$)/i.test(testMediaUrl.trim())
+                  ? "video"
+                  : "image",
+              }
+            : {}),
+        }),
       })
       const data = (await response.json()) as {
         error?: string
@@ -344,11 +356,22 @@ function DashboardPage() {
               rows={3}
               className="min-h-24 border-border/80 bg-background/80 text-base"
             />
+            <Input
+              value={testMediaUrl}
+              onChange={(e) => setTestMediaUrl(e.target.value.trim())}
+              placeholder="Optional https image or video URL"
+              className="h-13 border-border/80 bg-background/80 text-base"
+            />
             {testResult ? (
               <p className="text-sm text-muted-foreground" role="status">
                 {testResult}
               </p>
-            ) : null}
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                Media opens on the lock screen. Tapping the system alert always
+                lands there too.
+              </p>
+            )}
           </BottomSheetBody>
           <BottomSheetFooter>
             <Button
@@ -374,7 +397,7 @@ function DashboardPage() {
           <BottomSheetHeader>
             <BottomSheetTitle>API details</BottomSheetTitle>
             <BottomSheetDescription>
-              Endpoint, key, and a ready-to-copy curl example.
+              Endpoint, key, and a rich-notification curl example.
             </BottomSheetDescription>
           </BottomSheetHeader>
           <BottomSheetBody className="space-y-5">

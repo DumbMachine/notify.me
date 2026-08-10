@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router"
 
+import { parseNotifyPayload } from "@/lib/notify-payload"
 import { sendPushToChannel } from "@/lib/push"
 import { getChannel } from "@/lib/store"
 
@@ -32,42 +33,12 @@ export const Route = createFileRoute("/api/notify/$name")({
           return Response.json({ error: "Invalid JSON body." }, { status: 400 })
         }
 
-        const title =
-          typeof body === "object" &&
-          body !== null &&
-          "title" in body &&
-          typeof (body as { title: unknown }).title === "string"
-            ? (body as { title: string }).title.trim()
-            : ""
-
-        if (!title) {
-          return Response.json(
-            { error: "Field `title` is required." },
-            { status: 400 }
-          )
+        const parsed = parseNotifyPayload(body)
+        if (!parsed.ok) {
+          return Response.json({ error: parsed.error }, { status: 400 })
         }
 
-        const messageBody =
-          typeof body === "object" &&
-          body !== null &&
-          "body" in body &&
-          typeof (body as { body: unknown }).body === "string"
-            ? (body as { body: string }).body
-            : undefined
-
-        const url =
-          typeof body === "object" &&
-          body !== null &&
-          "url" in body &&
-          typeof (body as { url: unknown }).url === "string"
-            ? (body as { url: string }).url
-            : undefined
-
-        const result = await sendPushToChannel(channel, {
-          title,
-          body: messageBody,
-          url,
-        })
+        const result = await sendPushToChannel(channel, parsed.value)
 
         if (!result.ok) {
           return Response.json({ error: result.error }, { status: result.status })

@@ -1,4 +1,4 @@
-/* notify.me service worker — push + lock-screen inbox sync */
+/* notify.me service worker — rich push + lock-screen inbox */
 
 self.addEventListener("install", (event) => {
   event.waitUntil(self.skipWaiting())
@@ -14,8 +14,12 @@ self.addEventListener("push", (event) => {
     title: "notify.me",
     body: "You have a new notification",
     url: "/",
+    link: "",
     createdAt: Date.now(),
     name: "",
+    imageUrl: "",
+    mediaUrl: "",
+    mediaType: "image",
   }
 
   try {
@@ -26,28 +30,46 @@ self.addEventListener("push", (event) => {
         title: typeof data.title === "string" ? data.title : payload.title,
         body: typeof data.body === "string" ? data.body : payload.body,
         url: typeof data.url === "string" ? data.url : payload.url,
+        link: typeof data.link === "string" ? data.link : payload.link,
         createdAt:
           typeof data.createdAt === "number" ? data.createdAt : payload.createdAt,
         name: typeof data.name === "string" ? data.name : payload.name,
+        imageUrl:
+          typeof data.imageUrl === "string" ? data.imageUrl : payload.imageUrl,
+        mediaUrl:
+          typeof data.mediaUrl === "string" ? data.mediaUrl : payload.mediaUrl,
+        mediaType:
+          data.mediaType === "video" || data.mediaType === "image"
+            ? data.mediaType
+            : payload.mediaType,
       }
     }
   } catch {
     // keep defaults
   }
 
+  const options: Record<string, unknown> = {
+    body: payload.body,
+    icon: payload.imageUrl || "/logo192.png",
+    badge: "/logo192.png",
+    data: {
+      url: payload.url,
+      id: payload.id,
+      name: payload.name,
+      createdAt: payload.createdAt,
+      link: payload.link,
+      imageUrl: payload.imageUrl,
+      mediaUrl: payload.mediaUrl,
+      mediaType: payload.mediaType,
+    },
+  }
+  if (payload.mediaUrl && payload.mediaType !== "video") {
+    options.image = payload.mediaUrl
+  }
+
   event.waitUntil(
     (async () => {
-      await self.registration.showNotification(payload.title, {
-        body: payload.body,
-        icon: "/logo192.png",
-        badge: "/logo192.png",
-        data: {
-          url: payload.url,
-          id: payload.id,
-          name: payload.name,
-          createdAt: payload.createdAt,
-        },
-      })
+      await self.registration.showNotification(payload.title, options)
 
       const clients = await self.clients.matchAll({
         type: "window",
@@ -60,7 +82,10 @@ self.addEventListener("push", (event) => {
             id: payload.id || `local-${payload.createdAt}`,
             title: payload.title,
             body: payload.body,
-            url: payload.url,
+            url: payload.link || undefined,
+            imageUrl: payload.imageUrl || undefined,
+            mediaUrl: payload.mediaUrl || undefined,
+            mediaType: payload.mediaType || undefined,
             createdAt: payload.createdAt,
             delivered: true,
           },
@@ -72,8 +97,8 @@ self.addEventListener("push", (event) => {
 
 self.addEventListener("notificationclick", (event) => {
   event.notification.close()
-  const targetUrl =
-    (event.notification.data && event.notification.data.url) || "/"
+  const data = event.notification.data || {}
+  const targetUrl = data.url || "/"
 
   event.waitUntil(
     self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((clientList) => {

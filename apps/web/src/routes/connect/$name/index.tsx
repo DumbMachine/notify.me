@@ -25,8 +25,11 @@ import { Button } from "@workspace/ui/components/button"
 
 export const Route = createFileRoute("/connect/$name/")({
   component: ConnectPage,
-  validateSearch: (search: Record<string, unknown>): { k?: string } => ({
+  validateSearch: (
+    search: Record<string, unknown>
+  ): { k?: string; n?: string } => ({
     k: typeof search.k === "string" ? search.k : undefined,
+    n: typeof search.n === "string" ? search.n : undefined,
   }),
   head: ({ params }) => ({
     meta: [
@@ -87,7 +90,7 @@ function mergeNotifications(
 
 function ConnectPage() {
   const { name } = Route.useParams()
-  const { k: urlKey } = Route.useSearch()
+  const { k: urlKey, n: focusId } = Route.useSearch()
   const [apiKey, setApiKey] = useState<string | null>(null)
   const [channelOk, setChannelOk] = useState<boolean | null>(null)
   const [connected, setConnected] = useState(false)
@@ -380,6 +383,7 @@ function ConnectPage() {
       <LockScreen
         name={name}
         notifications={notifications}
+        focusId={focusId}
         footer={
           <div className="flex items-center justify-center gap-3 pb-1">
             <Button

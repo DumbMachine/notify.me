@@ -8,13 +8,10 @@ import {
   type NotificationEntry,
   type PushSubscriptionJSON,
 } from "@/lib/store"
+import type { RichNotifyInput } from "@/lib/notify-payload"
 import { configureWebPush } from "@/lib/vapid"
 
-export type NotifyPayload = {
-  title: string
-  body?: string
-  url?: string
-}
+export type NotifyPayload = RichNotifyInput
 
 export type NotifyResult =
   | {
@@ -24,14 +21,18 @@ export type NotifyResult =
     }
   | { ok: false; error: string; status: number }
 
+function lockScreenPath(name: string, notificationId: string) {
+  return `/connect/${encodeURIComponent(name)}?n=${encodeURIComponent(notificationId)}`
+}
+
 export async function sendPushToChannel(
   channel: Channel,
   payload: NotifyPayload
 ): Promise<NotifyResult> {
   const notificationId = createNotificationId()
   const body = payload.body ?? ""
-  const url = payload.url ?? `/connect/${channel.name}`
   const createdAt = Date.now()
+  const inboxUrl = lockScreenPath(channel.name, notificationId)
 
   let delivered = false
 
@@ -44,9 +45,14 @@ export async function sendPushToChannel(
           id: notificationId,
           title: payload.title,
           body,
-          url,
+          // Always open the installed lock-screen inbox on tap.
+          url: inboxUrl,
+          link: payload.url,
           name: channel.name,
           createdAt,
+          imageUrl: payload.imageUrl,
+          mediaUrl: payload.mediaUrl,
+          mediaType: payload.mediaType,
         })
       )
       delivered = true
@@ -61,16 +67,17 @@ export async function sendPushToChannel(
 
       if (statusCode === 404 || statusCode === 410) {
         await clearSubscription(channel.name)
-        // Still record history — lock screen remains the inbox.
       } else {
         const message =
           error instanceof Error ? error.message : "Failed to send notification"
-        // Persist history even when push transport fails this round.
         const notification = await appendNotification(channel.name, {
           id: notificationId,
           title: payload.title,
           body,
-          url,
+          url: payload.url,
+          imageUrl: payload.imageUrl,
+          mediaUrl: payload.mediaUrl,
+          mediaType: payload.mediaType,
           createdAt,
           delivered: false,
         })
@@ -90,7 +97,10 @@ export async function sendPushToChannel(
     id: notificationId,
     title: payload.title,
     body,
-    url,
+    url: payload.url,
+    imageUrl: payload.imageUrl,
+    mediaUrl: payload.mediaUrl,
+    mediaType: payload.mediaType,
     createdAt,
     delivered,
   })
