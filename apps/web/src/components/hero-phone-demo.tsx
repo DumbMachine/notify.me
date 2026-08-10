@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react"
 
+import { NotifyIcon } from "@/components/notify-icon"
 import { cn } from "@workspace/ui/lib/utils"
 
 type MediaKind = "deploy" | "logs" | "video"
@@ -249,8 +250,8 @@ function DemoNotification({
       ) : (
         <div className="px-3 py-2.5">
           <div className="flex items-start gap-2.5">
-            <div className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-[0.7rem] bg-gradient-to-br from-[oklch(0.78_0.24_341)] to-[oklch(0.45_0.22_320)] text-[10px] font-semibold text-white">
-              n
+            <div className="mt-0.5 size-8 shrink-0 overflow-hidden rounded-[0.7rem]">
+              <NotifyIcon className="size-full" />
             </div>
             <div className="min-w-0 flex-1">
               <div className="flex items-baseline justify-between gap-2">
@@ -365,8 +366,13 @@ export function HeroPhoneDemo({ className }: { className?: string }) {
         className="pointer-events-none absolute -inset-8 -z-10 rounded-[50%] bg-[radial-gradient(circle,oklch(0.67_0.29_341_/_0.28),transparent_70%)] blur-xl"
       />
 
-      <div className="relative aspect-[9/17.5] w-full overflow-hidden rounded-[2.35rem] border border-white/12 bg-black shadow-[0_40px_80px_-28px_rgba(0,0,0,0.85),inset_0_0_0_1px_rgba(255,255,255,0.06)]">
-        <div className="absolute inset-[0.35rem] overflow-hidden rounded-[2rem]">
+      {/*
+        Device frame: iPhone 16 Pro body 71.5 × 149.6 mm (Apple tech specs)
+        → aspect 65/136. Display panel itself is 1206 × 2622 (≈ 9/19.5).
+        Corner radius uses a length (not %) so curvature stays circular on a tall frame.
+      */}
+      <div className="relative aspect-[65/136] w-full overflow-hidden rounded-[2.65rem] border border-white/12 bg-black shadow-[0_40px_80px_-28px_rgba(0,0,0,0.85),inset_0_0_0_1px_rgba(255,255,255,0.06)]">
+        <div className="absolute inset-[2.4%] overflow-hidden rounded-[2.15rem]">
           <div
             aria-hidden
             className="absolute inset-0 bg-[radial-gradient(ellipse_80%_55%_at_30%_0%,oklch(0.67_0.29_341_/_0.32),transparent_55%),radial-gradient(ellipse_70%_50%_at_90%_20%,oklch(0.89_0.17_171_/_0.22),transparent_50%),linear-gradient(180deg,#1a0c18_0%,#0a060c_45%,#000_100%)]"
@@ -376,11 +382,12 @@ export function HeroPhoneDemo({ className }: { className?: string }) {
             className="absolute inset-0 opacity-30 [background-image:radial-gradient(rgba(255,255,255,0.08)_0.7px,transparent_0.7px)] [background-size:3px_3px]"
           />
 
-          <div className="absolute top-3 left-1/2 z-30 h-[1.55rem] w-[5.5rem] -translate-x-1/2 rounded-full bg-black shadow-[inset_0_0_0_1px_rgba(255,255,255,0.06)]" />
+          {/* Dynamic Island ≈ 125×37 pt on 402-pt-wide viewport */}
+          <div className="absolute top-[1.6%] left-1/2 z-30 h-[4.2%] w-[31%] -translate-x-1/2 rounded-full bg-black shadow-[inset_0_0_0_1px_rgba(255,255,255,0.06)]" />
 
-          <div className="relative z-10 flex h-full flex-col px-3.5 pt-12 pb-5 text-white">
+          <div className="relative z-10 flex h-full flex-col px-[5%] pt-[12%] pb-[5%] text-white">
             <div className="flex flex-col items-center text-center">
-              <p className="whitespace-nowrap font-heading text-[3.35rem] leading-none font-medium tracking-tight tabular-nums drop-shadow-[0_6px_18px_rgba(0,0,0,0.45)]">
+              <p className="whitespace-nowrap font-heading text-[2.85rem] leading-none font-medium tracking-tight tabular-nums drop-shadow-[0_6px_18px_rgba(0,0,0,0.45)]">
                 {formatClock(now)}
               </p>
               <p className="mt-1.5 text-[11px] font-medium tracking-wide text-white/75">
@@ -390,7 +397,7 @@ export function HeroPhoneDemo({ className }: { className?: string }) {
 
             <div
               className={cn(
-                "relative mt-7 overflow-hidden transition-[height,opacity] duration-500",
+                "relative mt-[8%] overflow-hidden transition-[height,opacity] duration-500",
                 phase === "clear" && "opacity-0"
               )}
               style={{ height: stackHeight }}
@@ -407,7 +414,7 @@ export function HeroPhoneDemo({ className }: { className?: string }) {
             </div>
 
             <div className="mt-auto flex flex-col items-center gap-3 pt-6">
-              <div className="h-1 w-28 rounded-full bg-white/35" />
+              <div className="h-1 w-[36%] rounded-full bg-white/35" />
             </div>
           </div>
         </div>

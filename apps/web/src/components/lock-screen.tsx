@@ -18,6 +18,7 @@ import {
   BottomSheetTitle,
 } from "@workspace/ui/components/bottom-sheet"
 import { Button } from "@workspace/ui/components/button"
+import { NotifyIcon } from "@/components/notify-icon"
 import { cn } from "@workspace/ui/lib/utils"
 
 export type LockNotification = {
@@ -74,11 +75,11 @@ function Avatar({ src, className }: { src?: string; className?: string }) {
   return (
     <div
       className={cn(
-        "mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-[0.85rem] bg-gradient-to-br from-[oklch(0.78_0.24_341)] to-[oklch(0.45_0.22_320)] text-[10px] font-semibold tracking-wide text-white shadow-sm",
+        "mt-0.5 size-9 shrink-0 overflow-hidden rounded-[0.85rem] shadow-sm",
         className
       )}
     >
-      n
+      <NotifyIcon className="size-full" />
     </div>
   )
 }
