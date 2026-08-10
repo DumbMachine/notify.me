@@ -2,7 +2,8 @@ import { useEffect, useState, type FormEvent } from "react"
 import { createFileRoute, useNavigate } from "@tanstack/react-router"
 import { ArrowRightIcon, KeyRoundIcon, SparklesIcon } from "lucide-react"
 
-import { AppShell, BrandMark } from "@/components/app-shell"
+import { BrandMark } from "@/components/app-shell"
+import { HeroPhoneDemo } from "@/components/hero-phone-demo"
 import {
   getBoundDevice,
   getLastName,
@@ -163,17 +164,66 @@ function HomePage() {
   }
 
   return (
-    <AppShell>
-      <div className="flex flex-1 flex-col">
-        <div className="pt-10 animate-in fade-in slide-in-from-bottom-3 duration-700">
-          <BrandMark size="hero" className="block" />
-          <p className="mt-5 max-w-[18rem] text-[17px] leading-relaxed text-muted-foreground">
-            A quiet little name for your phone. Claim it, connect once, notify
-            forever.
-          </p>
-        </div>
+    <div className="relative min-h-svh overflow-hidden atmosphere">
+      <div aria-hidden className="haze-orbs" />
 
-        <div className="mt-auto flex flex-col gap-3 pt-16 pb-2 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-100">
+      <div className="relative mx-auto flex min-h-svh w-full max-w-6xl flex-col safe-px safe-pt safe-pb lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(280px,360px)] lg:items-center lg:gap-10 lg:px-10">
+        <section className="flex flex-col pt-6 lg:pt-0 animate-in fade-in slide-in-from-bottom-3 duration-700">
+          <BrandMark size="lg" className="w-fit" />
+          <h1 className="mt-5 max-w-[16ch] font-heading text-[2.35rem] leading-[0.98] font-medium tracking-tight text-foreground sm:text-4xl lg:text-[2.75rem]">
+            From API to lock screen.
+          </h1>
+          <p className="mt-4 max-w-[28rem] text-[16px] leading-relaxed text-muted-foreground sm:text-[17px]">
+            Claim a name, connect your phone, and push notifications with one
+            call — they collect on a quiet little lock screen.
+          </p>
+
+          <div className="mt-8 hidden flex-col gap-3 sm:max-w-sm lg:flex">
+            {deviceName ? (
+              <button
+                type="button"
+                onClick={() =>
+                  void navigate({
+                    to: "/connect/$name",
+                    params: { name: deviceName },
+                  })
+                }
+                className="flex h-13 items-center justify-between gap-3 rounded-2xl border border-border/70 bg-card/80 px-4 text-start shadow-[0_12px_40px_-28px_rgba(36,58,46,0.45)] backdrop-blur-sm transition-colors hover:bg-card"
+              >
+                <span className="text-sm text-muted-foreground">Continue as</span>
+                <span className="flex items-center gap-2 font-medium">
+                  {deviceName}
+                  <ArrowRightIcon className="size-4 opacity-60" />
+                </span>
+              </button>
+            ) : null}
+            <Button
+              type="button"
+              size="lg"
+              className="h-14 w-full text-[15px]"
+              onClick={() => openSheet("claim")}
+            >
+              <SparklesIcon data-icon="inline-start" />
+              Claim a name
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              size="lg"
+              className="h-12 w-full text-muted-foreground"
+              onClick={() => openSheet("login")}
+            >
+              <KeyRoundIcon data-icon="inline-start" />
+              I already have one
+            </Button>
+          </div>
+        </section>
+
+        <section className="flex flex-1 items-center justify-center py-8 lg:py-10 animate-in fade-in zoom-in-95 duration-700 delay-100">
+          <HeroPhoneDemo />
+        </section>
+
+        <section className="mt-auto flex flex-col gap-3 pb-2 lg:hidden animate-in fade-in slide-in-from-bottom-4 duration-700 delay-150">
           {deviceName ? (
             <button
               type="button"
@@ -213,7 +263,7 @@ function HomePage() {
             <KeyRoundIcon data-icon="inline-start" />
             I already have one
           </Button>
-        </div>
+        </section>
       </div>
 
       <BottomSheet
@@ -306,6 +356,6 @@ function HomePage() {
           </form>
         </BottomSheetContent>
       </BottomSheet>
-    </AppShell>
+    </div>
   )
 }
