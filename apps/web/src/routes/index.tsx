@@ -1,12 +1,19 @@
 import { useEffect, useState, type FormEvent } from "react"
 import { createFileRoute, useNavigate } from "@tanstack/react-router"
-import { ArrowRightIcon, KeyRoundIcon, SparklesIcon } from "lucide-react"
+import {
+  ArrowRightIcon,
+  KeyRoundIcon,
+  QrCodeIcon,
+  SparklesIcon,
+} from "lucide-react"
 
 import { BrandMark } from "@/components/app-shell"
 import { HeroPhoneDemo } from "@/components/hero-phone-demo"
+import { isStandaloneDisplay } from "@/lib/device"
 import {
   getBoundDevice,
   getLastName,
+  loadCreds,
   saveCreds,
 } from "@/lib/session"
 import {
@@ -34,15 +41,6 @@ type SessionResponse = {
 }
 
 type SheetMode = "claim" | "login" | null
-
-function isStandaloneDisplay() {
-  if (typeof window === "undefined") return false
-  const media = window.matchMedia("(display-mode: standalone)").matches
-  const iosStandalone =
-    "standalone" in navigator &&
-    Boolean((navigator as Navigator & { standalone?: boolean }).standalone)
-  return media || iosStandalone
-}
 
 function NameField({
   id,
@@ -78,6 +76,47 @@ function NameField({
   )
 }
 
+function ContinueActions({
+  name,
+  canManage,
+  onInbox,
+  onManage,
+}: {
+  name: string
+  canManage: boolean
+  onInbox: () => void
+  onManage: () => void
+}) {
+  return (
+    <div className="flex flex-col gap-2">
+      <button
+        type="button"
+        onClick={onInbox}
+        className="flex h-12 items-center justify-between gap-3 bg-card px-3 text-start ring-1 ring-foreground/10 transition-colors hover:bg-muted"
+      >
+        <span className="text-sm text-muted-foreground">Open inbox</span>
+        <span className="flex items-center gap-2 font-medium">
+          {name}
+          <ArrowRightIcon className="size-4 opacity-60" />
+        </span>
+      </button>
+      {canManage ? (
+        <button
+          type="button"
+          onClick={onManage}
+          className="flex h-10 items-center justify-between gap-3 px-3 text-start text-sm text-muted-foreground transition-colors hover:text-foreground"
+        >
+          <span className="inline-flex items-center gap-2">
+            <QrCodeIcon className="size-3.5 opacity-70" />
+            Manage QR &amp; API
+          </span>
+          <span className="font-medium text-foreground">{name}</span>
+        </button>
+      ) : null}
+    </div>
+  )
+}
+
 function HomePage() {
   const navigate = useNavigate()
   const [sheet, setSheet] = useState<SheetMode>(null)
@@ -85,14 +124,18 @@ function HomePage() {
   const [apiKey, setApiKey] = useState("")
   const [error, setError] = useState<string | null>(null)
   const [pending, setPending] = useState(false)
-  const [deviceName, setDeviceName] = useState<string | null>(null)
+  const [continueName, setContinueName] = useState<string | null>(null)
+  const [canManage, setCanManage] = useState(false)
 
   useEffect(() => {
     const bound = getBoundDevice()
-    setDeviceName(bound)
     const last = getLastName()
+    const next = bound ?? last
+    setContinueName(next)
+    setCanManage(Boolean(next && loadCreds(next)))
     if (last) setName((current) => current || last)
 
+    // Phone Home Screen apps jump straight into the inbox.
     if (bound && isStandaloneDisplay()) {
       void navigate({
         to: "/connect/$name",
@@ -114,13 +157,14 @@ function HomePage() {
       connectUrl: data.connectUrl,
     })
     setSheet(null)
+    // Claim/login land in Manage so you can scan QR / grab the API key.
     await navigate({ to: "/$name", params: { name: data.name } })
   }
 
   async function onClaim(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    setError(null)
     setPending(true)
+    setError(null)
     try {
       const response = await fetch("/api/claim", {
         method: "POST",
@@ -142,8 +186,8 @@ function HomePage() {
 
   async function onLogin(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    setError(null)
     setPending(true)
+    setError(null)
     try {
       const response = await fetch("/api/login", {
         method: "POST",
@@ -152,7 +196,7 @@ function HomePage() {
       })
       const data = (await response.json()) as SessionResponse
       if (!response.ok) {
-        setError(data.error ?? "Could not open that name.")
+        setError(data.error ?? "Could not open that channel.")
         return
       }
       await persistAndGo(data)
@@ -171,31 +215,31 @@ function HomePage() {
         <section className="flex flex-col pt-6 lg:pt-0 animate-in fade-in slide-in-from-bottom-3 duration-700">
           <BrandMark size="lg" className="w-fit" />
           <h1 className="mt-5 max-w-[16ch] font-heading text-[2.35rem] leading-[0.98] font-medium tracking-tight text-foreground sm:text-4xl lg:text-[2.75rem]">
-            From API to lock screen.
+            From API to your screen.
           </h1>
           <p className="mt-4 max-w-[28rem] text-[16px] leading-relaxed text-muted-foreground sm:text-[17px]">
-            Claim a name, connect your phone, and push rich notifications —
-            screenshots, video, and links land on a quiet little lock screen.
+            Claim a name, connect a device, and push rich notifications —
+            phone lock screen on mobile, notification desk on desktop.
           </p>
 
           <div className="mt-8 hidden flex-col gap-3 sm:max-w-sm lg:flex">
-            {deviceName ? (
-              <button
-                type="button"
-                onClick={() =>
+            {continueName ? (
+              <ContinueActions
+                name={continueName}
+                canManage={canManage}
+                onInbox={() =>
                   void navigate({
                     to: "/connect/$name",
-                    params: { name: deviceName },
+                    params: { name: continueName },
                   })
                 }
-                className="flex h-12 items-center justify-between gap-3 bg-card px-3 text-start ring-1 ring-foreground/10 transition-colors hover:bg-muted"
-              >
-                <span className="text-sm text-muted-foreground">Continue as</span>
-                <span className="flex items-center gap-2 font-medium">
-                  {deviceName}
-                  <ArrowRightIcon className="size-4 opacity-60" />
-                </span>
-              </button>
+                onManage={() =>
+                  void navigate({
+                    to: "/$name",
+                    params: { name: continueName },
+                  })
+                }
+              />
             ) : null}
             <Button
               type="button"
@@ -239,23 +283,23 @@ function HomePage() {
         </section>
 
         <section className="mt-auto flex flex-col gap-3 pb-2 lg:hidden animate-in fade-in slide-in-from-bottom-4 duration-700 delay-150">
-          {deviceName ? (
-            <button
-              type="button"
-              onClick={() =>
+          {continueName ? (
+            <ContinueActions
+              name={continueName}
+              canManage={canManage}
+              onInbox={() =>
                 void navigate({
                   to: "/connect/$name",
-                  params: { name: deviceName },
+                  params: { name: continueName },
                 })
               }
-              className="flex h-12 items-center justify-between gap-3 bg-card px-3 text-start ring-1 ring-foreground/10 transition-colors hover:bg-muted"
-            >
-              <span className="text-sm text-muted-foreground">Continue as</span>
-              <span className="flex items-center gap-2 font-medium">
-                {deviceName}
-                <ArrowRightIcon className="size-4 opacity-60" />
-              </span>
-            </button>
+              onManage={() =>
+                void navigate({
+                  to: "/$name",
+                  params: { name: continueName },
+                })
+              }
+            />
           ) : null}
 
           <Button
@@ -303,7 +347,7 @@ function HomePage() {
                 </p>
               ) : (
                 <p className="text-sm text-muted-foreground">
-                  Demo storage may reset — keep your API key nearby.
+                  You’ll land in Manage next — scan the QR to open your inbox.
                 </p>
               )}
             </BottomSheetBody>
@@ -333,7 +377,8 @@ function HomePage() {
             <BottomSheetHeader>
               <BottomSheetTitle>Welcome back</BottomSheetTitle>
               <BottomSheetDescription>
-                Open your dashboard with your name and API key.
+                Open Manage with your name and API key — QR, API, and tests live
+                there.
               </BottomSheetDescription>
             </BottomSheetHeader>
             <BottomSheetBody>
@@ -364,7 +409,7 @@ function HomePage() {
                   pending || name.trim().length < 3 || apiKey.length < 16
                 }
               >
-                {pending ? "Opening…" : "Open dashboard"}
+                {pending ? "Opening…" : "Open Manage"}
                 <ArrowRightIcon data-icon="inline-end" />
               </Button>
             </BottomSheetFooter>

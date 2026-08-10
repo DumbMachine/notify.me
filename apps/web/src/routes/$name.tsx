@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type FormEvent } from "react"
-import { createFileRoute } from "@tanstack/react-router"
-import { Code2Icon, SendIcon } from "lucide-react"
+import { createFileRoute, Link } from "@tanstack/react-router"
+import { Code2Icon, MonitorSmartphoneIcon, SendIcon } from "lucide-react"
 
 import { AppShell, ScreenHeader, SoftStatus } from "@/components/app-shell"
 import { CopyButton } from "@/components/copy-button"
@@ -214,15 +214,15 @@ function DashboardPage() {
     >
       <main className="flex flex-1 flex-col">
         <section className="pt-4 animate-in fade-in slide-in-from-bottom-2 duration-500">
-          <p className="text-sm text-muted-foreground">Your private channel</p>
+          <p className="text-sm text-muted-foreground">Manage</p>
           <h1 className="mt-1 font-heading text-4xl font-medium tracking-tight">
             {name}
           </h1>
           <p className="mt-3 max-w-[20rem] text-[15px] leading-relaxed text-muted-foreground">
             {creds
               ? connected
-                ? "Phone is linked. Send a test anytime."
-                : "Scan with your phone to install and enable alerts."
+                ? "Device linked. Open your inbox, send a test, or use the API."
+                : "Scan with your phone to open the lock-screen inbox — or open inbox on this device."
               : "Unlock to see your connect QR and API details."}
           </p>
         </section>
@@ -234,11 +234,20 @@ function DashboardPage() {
                 <QrCode value={connectUrl} size={200} />
               </div>
               <p className="mt-5 text-center text-sm text-muted-foreground">
-                Open on your phone ·{" "}
+                Phone opens lock screen ·{" "}
                 <span className="text-foreground">/connect/{name}</span>
               </p>
-              <div className="mt-3">
+              <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
                 <CopyButton value={connectUrl} label="Copy link" />
+                <Button
+                  nativeButton={false}
+                  variant="outline"
+                  size="sm"
+                  render={<Link to="/connect/$name" params={{ name }} />}
+                >
+                  <MonitorSmartphoneIcon data-icon="inline-start" />
+                  Open inbox
+                </Button>
               </div>
             </section>
 
@@ -368,8 +377,8 @@ function DashboardPage() {
               </p>
             ) : (
               <p className="text-sm text-muted-foreground">
-                Media opens on the lock screen. Tapping the system alert always
-                lands there too.
+                Media opens in the inbox. Tapping a system alert lands there
+                too.
               </p>
             )}
           </BottomSheetBody>

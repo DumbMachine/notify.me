@@ -1,12 +1,19 @@
 import { useEffect, useMemo, useState } from "react"
 import { createFileRoute, Link } from "@tanstack/react-router"
-import { BellRingIcon, HomeIcon, Settings2Icon } from "lucide-react"
+import {
+  BellRingIcon,
+  HomeIcon,
+  QrCodeIcon,
+  Settings2Icon,
+} from "lucide-react"
 
+import { DesktopDesk } from "@/components/desktop-desk"
 import { InstallNudge } from "@/components/install-nudge"
 import {
   LockScreen,
   type LockNotification,
 } from "@/components/lock-screen"
+import { isStandaloneDisplay, prefersPhoneInbox } from "@/lib/device"
 import {
   bindDevice,
   buildConnectManifestUrl,
@@ -68,12 +75,7 @@ function urlBase64ToUint8Array(base64String: string) {
 }
 
 function isStandaloneApp() {
-  if (typeof window === "undefined") return false
-  const media = window.matchMedia("(display-mode: standalone)").matches
-  const iosStandalone =
-    "standalone" in navigator &&
-    Boolean((navigator as Navigator & { standalone?: boolean }).standalone)
-  return media || iosStandalone
+  return isStandaloneDisplay()
 }
 
 function mergeNotifications(
@@ -106,6 +108,17 @@ function ConnectPage() {
   const [isStandalone, setIsStandalone] = useState(false)
   const [setupOpen, setSetupOpen] = useState(false)
   const [notifications, setNotifications] = useState<LockNotification[]>([])
+  const [phoneInbox, setPhoneInbox] = useState(true)
+
+  useEffect(() => {
+    function refreshSurface() {
+      setPhoneInbox(prefersPhoneInbox())
+    }
+    refreshSurface()
+    const narrow = window.matchMedia("(max-width: 768px)")
+    narrow.addEventListener("change", refreshSurface)
+    return () => narrow.removeEventListener("change", refreshSurface)
+  }, [])
 
   useEffect(() => {
     bindDevice(name)
@@ -341,7 +354,7 @@ function ConnectPage() {
   const notificationsReady = permission === "granted" && connected
   const setupPhase: "install" | "notify" | "done" = notificationsReady
     ? "done"
-    : isStandalone
+    : isStandalone || !phoneInbox
       ? "notify"
       : "install"
 
@@ -359,6 +372,41 @@ function ConnectPage() {
       }
     }
   }, [setupPhase])
+
+  const inboxFooter = (
+    <div className="flex flex-wrap items-center justify-center gap-2 pb-1">
+      <Button
+        type="button"
+        variant="secondary"
+        className={
+          phoneInbox
+            ? "h-10 bg-white/12 text-white hover:bg-white/18 hover:text-white"
+            : "h-9 bg-white/14 text-white hover:bg-white/20 hover:text-white"
+        }
+        onClick={() => setSetupOpen(true)}
+      >
+        {setupPhase === "done" ? (
+          <Settings2Icon data-icon="inline-start" />
+        ) : (
+          <BellRingIcon data-icon="inline-start" />
+        )}
+        {setupLabel}
+      </Button>
+      <Button
+        nativeButton={false}
+        variant="secondary"
+        className={
+          phoneInbox
+            ? "h-10 bg-white/12 text-white hover:bg-white/18 hover:text-white"
+            : "h-9 bg-white/14 text-white hover:bg-white/20 hover:text-white"
+        }
+        render={<Link to="/$name" params={{ name }} />}
+      >
+        <QrCodeIcon data-icon="inline-start" />
+        Manage
+      </Button>
+    </div>
+  )
 
   if (channelOk === false) {
     return (
@@ -386,7 +434,7 @@ function ConnectPage() {
   if (!keyReady) {
     return (
       <div className="flex min-h-svh items-center justify-center bg-black text-white/60">
-        Opening lock screen…
+        Opening inbox…
       </div>
     )
   }
@@ -398,9 +446,9 @@ function ConnectPage() {
           Open from your QR
         </h1>
         <p className="max-w-[22rem] text-[15px] leading-relaxed text-muted-foreground">
-          This lock screen needs the connect link from your dashboard so it can
-          show your notification history. Scan the QR again, then add to Home
-          Screen from that page.
+          This inbox needs the connect link from Manage so it can show your
+          notification history. Scan the QR again, then save to Home Screen from
+          that page on your phone.
         </p>
         <Button
           nativeButton={false}
@@ -417,34 +465,20 @@ function ConnectPage() {
   if (channelOk === null) {
     return (
       <div className="flex min-h-svh items-center justify-center bg-black text-white/60">
-        Opening lock screen…
+        Opening inbox…
       </div>
     )
   }
 
+  const InboxSurface = phoneInbox ? LockScreen : DesktopDesk
+
   return (
     <>
-      <LockScreen
+      <InboxSurface
         name={name}
         notifications={notifications}
         focusId={focusId}
-        footer={
-          <div className="flex items-center justify-center gap-3 pb-1">
-            <Button
-              type="button"
-              variant="secondary"
-              className="h-10 bg-white/12 text-white hover:bg-white/18 hover:text-white"
-              onClick={() => setSetupOpen(true)}
-            >
-              {setupPhase === "done" ? (
-                <Settings2Icon data-icon="inline-start" />
-              ) : (
-                <BellRingIcon data-icon="inline-start" />
-              )}
-              {setupLabel}
-            </Button>
-          </div>
-        }
+        footer={inboxFooter}
       />
 
       <BottomSheet open={setupOpen} onOpenChange={setSetupOpen}>
@@ -455,14 +489,14 @@ function ConnectPage() {
                 ? "Connected"
                 : setupPhase === "notify"
                   ? "Enable alerts"
-                  : "Save this lock screen"}
+                  : "Save this inbox"}
             </BottomSheetTitle>
             <BottomSheetDescription>
               {setupPhase === "done"
-                ? "Push is on. You can still browse history here anytime."
+                ? "Push is on. Browse history here anytime — or open Manage for QR and API."
                 : setupPhase === "notify"
                   ? "Allow notifications so new pings arrive instantly."
-                  : "Install for the full app feel — or keep this tab open as a live inbox."}
+                  : "Install on your phone for the full lock-screen feel — or keep this tab open as a live inbox."}
             </BottomSheetDescription>
           </BottomSheetHeader>
           <BottomSheetBody>
@@ -512,14 +546,23 @@ function ConnectPage() {
               </p>
             )}
           </BottomSheetBody>
-          <BottomSheetFooter>
+          <BottomSheetFooter className="flex flex-col gap-2">
+            <Button
+              nativeButton={false}
+              variant="secondary"
+              className="h-11 w-full"
+              render={<Link to="/$name" params={{ name }} />}
+            >
+              <QrCodeIcon data-icon="inline-start" />
+              Open Manage
+            </Button>
             <Button
               type="button"
               variant="ghost"
               className="h-11 w-full"
               onClick={() => setSetupOpen(false)}
             >
-              Back to lock screen
+              Back to inbox
             </Button>
           </BottomSheetFooter>
         </BottomSheetContent>
