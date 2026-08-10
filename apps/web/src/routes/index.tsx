@@ -78,57 +78,6 @@ function NameField({
   )
 }
 
-function CtaBlock({
-  deviceName,
-  onContinue,
-  onClaim,
-  onLogin,
-}: {
-  deviceName: string | null
-  onContinue: () => void
-  onClaim: () => void
-  onLogin: () => void
-}) {
-  return (
-    <div className="flex w-full flex-col gap-3">
-      {deviceName ? (
-        <button
-          type="button"
-          onClick={onContinue}
-          className="flex h-13 items-center justify-between gap-3 rounded-2xl border border-white/25 bg-white/15 px-4 text-start text-white shadow-[0_12px_40px_-28px_rgba(0,0,0,0.45)] backdrop-blur-md transition-colors hover:bg-white/22"
-        >
-          <span className="text-sm text-white/70">Continue as</span>
-          <span className="flex items-center gap-2 font-medium">
-            {deviceName}
-            <ArrowRightIcon className="size-4 opacity-70" />
-          </span>
-        </button>
-      ) : null}
-
-      <Button
-        type="button"
-        size="lg"
-        className="h-14 w-full text-[15px]"
-        onClick={onClaim}
-      >
-        <SparklesIcon data-icon="inline-start" />
-        Claim a name
-      </Button>
-
-      <Button
-        type="button"
-        variant="ghost"
-        size="lg"
-        className="h-12 w-full text-white/80 hover:bg-white/10 hover:text-white"
-        onClick={onLogin}
-      >
-        <KeyRoundIcon data-icon="inline-start" />
-        I already have one
-      </Button>
-    </div>
-  )
-}
-
 function HomePage() {
   const navigate = useNavigate()
   const [sheet, setSheet] = useState<SheetMode>(null)
@@ -214,53 +163,121 @@ function HomePage() {
     }
   }
 
-  const ctaProps = {
-    deviceName,
-    onContinue: () =>
-      void navigate({
-        to: "/connect/$name",
-        params: { name: deviceName! },
-      }),
-    onClaim: () => openSheet("claim"),
-    onLogin: () => openSheet("login"),
-  }
-
   return (
-    <div className="relative min-h-svh overflow-hidden">
-      <div aria-hidden className="absolute inset-0">
-        <picture>
-          <source srcSet="/hero-bg.avif" type="image/avif" />
-          <img
-            src="/hero-bg.jpg"
-            alt=""
-            className="size-full object-cover object-center"
-          />
-        </picture>
-        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(10,18,16,0.45)_0%,rgba(10,18,16,0.28)_35%,rgba(10,18,16,0.55)_100%)]" />
-      </div>
+    <div className="relative min-h-svh overflow-hidden atmosphere">
+      <div aria-hidden className="haze-orbs" />
 
-      <div className="relative mx-auto flex min-h-svh w-full max-w-5xl flex-col safe-px safe-pt safe-pb">
-        <section className="pt-4 text-white animate-in fade-in slide-in-from-bottom-3 duration-700 sm:pt-6">
-          <BrandMark size="lg" className="w-fit text-white" />
-          <h1 className="mt-4 max-w-[16ch] font-heading text-[2.35rem] leading-[0.98] font-medium tracking-tight sm:text-4xl lg:text-[2.85rem]">
+      <div className="relative mx-auto flex min-h-svh w-full max-w-6xl flex-col safe-px safe-pt safe-pb lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(320px,420px)] lg:items-center lg:gap-10 lg:px-10">
+        <section className="flex flex-col pt-6 lg:pt-0 animate-in fade-in slide-in-from-bottom-3 duration-700">
+          <BrandMark size="lg" className="w-fit" />
+          <h1 className="mt-5 max-w-[16ch] font-heading text-[2.35rem] leading-[0.98] font-medium tracking-tight text-foreground sm:text-4xl lg:text-[2.75rem]">
             From API to lock screen.
           </h1>
-          <p className="mt-3 max-w-[28rem] text-[15px] leading-relaxed text-white/75 sm:text-[16px]">
+          <p className="mt-4 max-w-[28rem] text-[16px] leading-relaxed text-muted-foreground sm:text-[17px]">
             Claim a name, connect your phone, and push rich notifications —
             screenshots, video, and links land on a quiet little lock screen.
           </p>
+
+          <div className="mt-8 hidden flex-col gap-3 sm:max-w-sm lg:flex">
+            {deviceName ? (
+              <button
+                type="button"
+                onClick={() =>
+                  void navigate({
+                    to: "/connect/$name",
+                    params: { name: deviceName },
+                  })
+                }
+                className="flex h-13 items-center justify-between gap-3 rounded-2xl border border-border/70 bg-card/80 px-4 text-start shadow-[0_12px_40px_-28px_rgba(36,58,46,0.45)] backdrop-blur-sm transition-colors hover:bg-card"
+              >
+                <span className="text-sm text-muted-foreground">Continue as</span>
+                <span className="flex items-center gap-2 font-medium">
+                  {deviceName}
+                  <ArrowRightIcon className="size-4 opacity-60" />
+                </span>
+              </button>
+            ) : null}
+            <Button
+              type="button"
+              size="lg"
+              className="h-14 w-full text-[15px]"
+              onClick={() => openSheet("claim")}
+            >
+              <SparklesIcon data-icon="inline-start" />
+              Claim a name
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              size="lg"
+              className="h-12 w-full text-muted-foreground"
+              onClick={() => openSheet("login")}
+            >
+              <KeyRoundIcon data-icon="inline-start" />
+              I already have one
+            </Button>
+          </div>
         </section>
 
-        <section className="flex flex-1 items-center justify-center py-6 animate-in fade-in zoom-in-95 duration-700 delay-100 sm:py-8">
-          <div className="w-full max-w-[34rem] rounded-[2rem] border border-white/25 bg-white/12 p-4 shadow-[0_40px_100px_-40px_rgba(0,0,0,0.65)] backdrop-blur-2xl sm:rounded-[2.4rem] sm:p-7 md:p-9">
-            <div className="mx-auto w-full max-w-[280px] sm:max-w-[300px]">
-              <HeroPhoneDemo className="max-w-none!" />
+        <section className="flex flex-1 items-center justify-center py-8 lg:py-10 animate-in fade-in zoom-in-95 duration-700 delay-100">
+          <div className="relative w-full max-w-[22rem] overflow-hidden rounded-[2rem] border border-white/40 p-5 shadow-[0_30px_80px_-36px_rgba(36,58,46,0.45)] sm:max-w-[24rem] sm:rounded-[2.25rem] sm:p-7">
+            <div aria-hidden className="absolute inset-0">
+              <picture>
+                <source srcSet="/hero-bg.avif" type="image/avif" />
+                <img
+                  src="/hero-bg.jpg"
+                  alt=""
+                  className="size-full object-cover object-center"
+                />
+              </picture>
+              <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(12,20,18,0.22),rgba(12,20,18,0.38))]" />
+            </div>
+            <div className="relative mx-auto w-full max-w-[280px]">
+              <HeroPhoneDemo className="max-w-none" />
             </div>
           </div>
         </section>
 
-        <section className="mx-auto w-full max-w-sm pb-2 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-150">
-          <CtaBlock {...ctaProps} />
+        <section className="mt-auto flex flex-col gap-3 pb-2 lg:hidden animate-in fade-in slide-in-from-bottom-4 duration-700 delay-150">
+          {deviceName ? (
+            <button
+              type="button"
+              onClick={() =>
+                void navigate({
+                  to: "/connect/$name",
+                  params: { name: deviceName },
+                })
+              }
+              className="flex h-13 items-center justify-between gap-3 rounded-2xl border border-border/70 bg-card/80 px-4 text-start shadow-[0_12px_40px_-28px_rgba(36,58,46,0.45)] backdrop-blur-sm transition-colors hover:bg-card"
+            >
+              <span className="text-sm text-muted-foreground">Continue as</span>
+              <span className="flex items-center gap-2 font-medium">
+                {deviceName}
+                <ArrowRightIcon className="size-4 opacity-60" />
+              </span>
+            </button>
+          ) : null}
+
+          <Button
+            type="button"
+            size="lg"
+            className="h-14 w-full text-[15px]"
+            onClick={() => openSheet("claim")}
+          >
+            <SparklesIcon data-icon="inline-start" />
+            Claim a name
+          </Button>
+
+          <Button
+            type="button"
+            variant="ghost"
+            size="lg"
+            className="h-12 w-full text-muted-foreground"
+            onClick={() => openSheet("login")}
+          >
+            <KeyRoundIcon data-icon="inline-start" />
+            I already have one
+          </Button>
         </section>
       </div>
 

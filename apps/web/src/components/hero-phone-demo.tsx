@@ -358,10 +358,9 @@ export function HeroPhoneDemo({ className }: { className?: string }) {
 
   return (
     <div className={cn("relative mx-auto w-full max-w-[280px]", className)}>
-      {/* Soft lift only — scenic page BG provides atmosphere */}
       <div
         aria-hidden
-        className="pointer-events-none absolute -inset-6 -z-10 rounded-[50%] bg-[radial-gradient(circle,rgba(0,0,0,0.28),transparent_70%)] blur-xl"
+        className="pointer-events-none absolute -inset-8 -z-10 rounded-[50%] bg-[radial-gradient(circle,rgba(0,0,0,0.22),transparent_70%)] blur-xl"
       />
 
       <div className="relative aspect-[9/17.5] w-full overflow-hidden rounded-[2.35rem] border border-foreground/15 bg-[#0c1412] shadow-[0_40px_80px_-28px_rgba(20,40,34,0.55),inset_0_0_0_1px_rgba(255,255,255,0.08)]">
