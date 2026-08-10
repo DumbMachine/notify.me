@@ -405,15 +405,7 @@ export function HeroPhoneDemo({ className }: { className?: string }) {
               ))}
             </div>
 
-            <p className="mt-3 text-center text-[10px] tracking-wide text-white/45 transition-opacity duration-300">
-              {phase === "expand"
-                ? "Tap opens rich detail"
-                : phase === "swipe"
-                  ? "Swipe to clear"
-                  : "Screenshots · video · links"}
-            </p>
-
-            <div className="mt-auto flex flex-col items-center gap-3 pt-4">
+            <div className="mt-auto flex flex-col items-center gap-3 pt-6">
               <div className="h-1 w-28 rounded-full bg-white/35" />
             </div>
           </div>
