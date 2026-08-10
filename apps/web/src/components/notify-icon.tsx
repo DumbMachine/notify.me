@@ -4,8 +4,8 @@ import { cn } from "@workspace/ui/lib/utils"
 
 /**
  * notify.me app mark. Themeable via CSS variables:
- *   --notify-icon-bg     → background squircle (falls back to --primary)
- *   --notify-icon-fg     → bell (falls back to --primary-foreground)
+ *   --notify-icon-bg     → background squircle (falls back to black)
+ *   --notify-icon-fg     → bell (falls back to --primary)
  *   --notify-icon-badge  → notification dot (falls back to --accent)
  */
 export function NotifyIcon({
@@ -27,10 +27,10 @@ export function NotifyIcon({
         width="512"
         height="512"
         rx="114"
-        fill="var(--notify-icon-bg, var(--primary))"
+        fill="var(--notify-icon-bg, #000)"
       />
       <path
-        fill="var(--notify-icon-fg, var(--primary-foreground))"
+        fill="var(--notify-icon-fg, var(--primary))"
         d="M256 92c-55 0-99 44-99 99v62c0 21-8 41-23 56l-14 14c-13 13-4 35 14 35h244c18 0 27-22 14-35l-14-14c-15-15-23-35-23-56v-62c0-55-44-99-99-99zm-48 302c10 22 28 34 48 34s38-12 48-34z"
       />
       <circle

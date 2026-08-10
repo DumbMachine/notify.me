@@ -63,8 +63,8 @@
   --spacing: 0.25rem;
   --surface-glass: oklch(1 0 0 / 0.72);
   --glow: oklch(0.6726 0.2904 341.4084 / 0.28);
-  --notify-icon-bg: var(--primary);
-  --notify-icon-fg: var(--primary-foreground);
+  --notify-icon-bg: #000;
+  --notify-icon-fg: var(--primary);
   --notify-icon-badge: var(--accent);
 }
 
@@ -121,8 +121,8 @@
   --shadow-2xl: 0px 2px 12px 0px hsl(0 0% 0% / 0.75);
   --surface-glass: oklch(0.1776 0 0 / 0.78);
   --glow: oklch(0.6726 0.2904 341.4084 / 0.35);
-  --notify-icon-bg: var(--primary);
-  --notify-icon-fg: var(--primary-foreground);
+  --notify-icon-bg: #000;
+  --notify-icon-fg: var(--primary);
   --notify-icon-badge: var(--accent);
 }
 

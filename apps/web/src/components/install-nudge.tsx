@@ -142,8 +142,9 @@ export function InstallNudge({
               {platform === "ios" ? "Add to Home Screen" : "Install"}
             </BottomSheetTitle>
             <BottomSheetDescription>
-              Stay on this page so it opens{" "}
-              <span className="text-foreground">/connect/{name}</span>.
+              Stay on this page so Home Screen opens{" "}
+              <span className="text-foreground">/connect/{name}</span> with your
+              saved key.
             </BottomSheetDescription>
           </BottomSheetHeader>
           <BottomSheetBody>

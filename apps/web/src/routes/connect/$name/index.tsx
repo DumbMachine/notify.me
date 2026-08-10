@@ -9,6 +9,7 @@ import {
 } from "@/components/lock-screen"
 import {
   bindDevice,
+  buildConnectManifestUrl,
   resolveDeviceApiKey,
   saveDeviceChannel,
 } from "@/lib/session"
@@ -92,6 +93,7 @@ function ConnectPage() {
   const { name } = Route.useParams()
   const { k: urlKey, n: focusId } = Route.useSearch()
   const [apiKey, setApiKey] = useState<string | null>(null)
+  const [keyReady, setKeyReady] = useState(false)
   const [channelOk, setChannelOk] = useState<boolean | null>(null)
   const [connected, setConnected] = useState(false)
   const [permission, setPermission] = useState<NotificationPermission>(
@@ -107,10 +109,41 @@ function ConnectPage() {
     bindDevice(name)
     const resolved = resolveDeviceApiKey(name, urlKey)
     setApiKey(resolved)
-    if (urlKey) {
-      saveDeviceChannel(name, { apiKey: urlKey })
+    setKeyReady(true)
+    if (resolved) {
+      // Persist for Home Screen launches (manifest start_url drops ?k= unless we
+      // inject a client manifest; cookie/localStorage cover return visits).
+      saveDeviceChannel(name, { apiKey: resolved })
     }
   }, [name, urlKey])
+
+  useEffect(() => {
+    if (!apiKey) return
+
+    const href = buildConnectManifestUrl(name, apiKey)
+    const links = [
+      ...document.querySelectorAll<HTMLLinkElement>('link[rel="manifest"]'),
+    ]
+    const previousHrefs = links.map((link) => link.href)
+
+    if (links.length === 0) {
+      const link = document.createElement("link")
+      link.rel = "manifest"
+      link.href = href
+      document.head.appendChild(link)
+    } else {
+      for (const link of links) {
+        link.href = href
+      }
+    }
+
+    return () => {
+      URL.revokeObjectURL(href)
+      for (const previous of previousHrefs) {
+        if (previous.startsWith("blob:")) URL.revokeObjectURL(previous)
+      }
+    }
+  }, [apiKey, name])
 
   useEffect(() => {
     setIsStandalone(isStandaloneApp())
@@ -348,6 +381,14 @@ function ConnectPage() {
     )
   }
 
+  if (!keyReady) {
+    return (
+      <div className="flex min-h-svh items-center justify-center bg-black text-white/60">
+        Opening lock screen…
+      </div>
+    )
+  }
+
   if (!apiKey) {
     return (
       <main className="mx-auto flex min-h-svh max-w-md flex-col justify-center gap-5 px-5 atmosphere">
@@ -356,7 +397,8 @@ function ConnectPage() {
         </h1>
         <p className="max-w-[22rem] text-[15px] leading-relaxed text-muted-foreground">
           This lock screen needs the connect link from your dashboard so it can
-          show your notification history.
+          show your notification history. Scan the QR again, then add to Home
+          Screen from that page.
         </p>
         <Button
           nativeButton={false}

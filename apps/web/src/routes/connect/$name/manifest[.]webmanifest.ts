@@ -9,8 +9,8 @@ export const Route = createFileRoute("/connect/$name/manifest.webmanifest")({
         const name = normalizeName(params.name)
         const appName = `notify.me/${name}`
 
-        // Served under /connect/:name/ so start_url "." resolves to this page,
-        // which is what iOS needs for page-specific Home Screen installs.
+        // Static fallback before the client injects a manifest with ?k= in
+        // start_url. Served under /connect/:name/ so "." scopes correctly.
         const manifest = {
           id: `.`,
           name: appName,
