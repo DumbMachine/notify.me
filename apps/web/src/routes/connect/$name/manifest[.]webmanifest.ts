@@ -7,14 +7,13 @@ export const Route = createFileRoute("/connect/$name/manifest.webmanifest")({
     handlers: {
       GET: async ({ params }) => {
         const name = normalizeName(params.name)
-        const appName = `notify.me/${name}`
 
         // Static fallback before the client injects a manifest with ?k= in
         // start_url. Served under /connect/:name/ so "." scopes correctly.
         const manifest = {
           id: `.`,
-          name: appName,
-          short_name: name,
+          name: "Notify.me",
+          short_name: "Notify.me",
           description: `Push notifications for ${name}`,
           start_url: ".",
           scope: ".",

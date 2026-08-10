@@ -127,8 +127,8 @@ export function buildConnectManifestUrl(name: string, apiKey: string) {
   const startUrl = `${path}?k=${encodeURIComponent(apiKey)}`
   const manifest = {
     id: startUrl,
-    name: `notify.me/${name}`,
-    short_name: name,
+    name: "Notify.me",
+    short_name: "Notify.me",
     description: `Push notifications for ${name}`,
     start_url: startUrl,
     scope: path,
