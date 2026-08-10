@@ -74,7 +74,7 @@ function Avatar({ src, className }: { src?: string; className?: string }) {
   return (
     <div
       className={cn(
-        "mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-[0.85rem] bg-gradient-to-br from-emerald-200/90 to-teal-700 text-[10px] font-semibold tracking-wide text-white shadow-sm",
+        "mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-[0.85rem] bg-gradient-to-br from-[oklch(0.78_0.24_341)] to-[oklch(0.45_0.22_320)] text-[10px] font-semibold tracking-wide text-white shadow-sm",
         className
       )}
     >
@@ -271,7 +271,7 @@ export function LockScreen({
     >
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_120%_80%_at_20%_-10%,rgba(180,220,190,0.28),transparent_50%),radial-gradient(ellipse_90%_70%_at_90%_10%,rgba(90,140,160,0.35),transparent_45%),linear-gradient(180deg,#1a2c28_0%,#0f1a18_42%,#0a1211_100%)]"
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_120%_80%_at_20%_-10%,oklch(0.67_0.29_341_/_0.32),transparent_50%),radial-gradient(ellipse_90%_70%_at_90%_10%,oklch(0.89_0.17_171_/_0.22),transparent_45%),linear-gradient(180deg,#1a0c18_0%,#0a060c_42%,#000_100%)]"
       />
       <div
         aria-hidden

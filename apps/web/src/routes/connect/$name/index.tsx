@@ -36,7 +36,7 @@ export const Route = createFileRoute("/connect/$name/")({
       { title: `${params.name} · notify.me` },
       { name: "apple-mobile-web-app-capable", content: "yes" },
       { name: "mobile-web-app-capable", content: "yes" },
-      { name: "theme-color", content: "#0f1a18" },
+      { name: "theme-color", content: "#000000" },
       {
         name: "apple-mobile-web-app-status-bar-style",
         content: "black-translucent",
@@ -372,7 +372,7 @@ function ConnectPage() {
 
   if (channelOk === null) {
     return (
-      <div className="flex min-h-svh items-center justify-center bg-[#0f1a18] text-white/60">
+      <div className="flex min-h-svh items-center justify-center bg-black text-white/60">
         Opening lock screen…
       </div>
     )

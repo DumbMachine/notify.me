@@ -230,7 +230,7 @@ function HomePage() {
                   className="size-full object-cover object-center"
                 />
               </picture>
-              <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(12,20,18,0.22),rgba(12,20,18,0.38))]" />
+              <div className="absolute inset-0 bg-[linear-gradient(180deg,oklch(0_0_0_/_0.35),oklch(0.67_0.29_341_/_0.28)_45%,oklch(0_0_0_/_0.55))]" />
             </div>
             <div className="relative mx-auto w-full max-w-[280px]">
               <HeroPhoneDemo className="max-w-none" />

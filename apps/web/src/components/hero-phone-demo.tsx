@@ -61,14 +61,14 @@ function DeployPreview({ tall }: { tall?: boolean }) {
   return (
     <div
       className={cn(
-        "relative mt-2 overflow-hidden rounded-[0.9rem] border border-white/15 bg-[#10241f]",
+        "relative mt-2 overflow-hidden rounded-[0.9rem] border border-white/15 bg-[#120818]",
         tall ? "h-[7.25rem]" : "h-[4.35rem]"
       )}
     >
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_0%,rgba(125,211,192,0.35),transparent_55%),linear-gradient(180deg,#1a3b34,#0d1c19)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_0%,oklch(0.89_0.17_171_/_0.35),transparent_55%),linear-gradient(180deg,#1a1020,#0a060e)]" />
       <div className="relative flex h-full flex-col justify-between p-2.5">
         <div className="flex items-center gap-2">
-          <div className="flex size-6 items-center justify-center rounded-full bg-emerald-400/20 text-[11px] text-emerald-200">
+          <div className="flex size-6 items-center justify-center rounded-full bg-[oklch(0.89_0.17_171_/_0.22)] text-[11px] text-[oklch(0.92_0.12_171)]">
             ✓
           </div>
           <div className="min-w-0">
@@ -77,13 +77,13 @@ function DeployPreview({ tall }: { tall?: boolean }) {
             </p>
             <p className="truncate text-[8px] text-white/55">main · 42s</p>
           </div>
-          <span className="ms-auto rounded-full bg-emerald-400/20 px-1.5 py-0.5 text-[8px] font-medium text-emerald-200">
+          <span className="ms-auto rounded-full bg-[oklch(0.89_0.17_171_/_0.22)] px-1.5 py-0.5 text-[8px] font-medium text-[oklch(0.92_0.12_171)]">
             live
           </span>
         </div>
         <div className="space-y-1">
           <div className="h-1.5 overflow-hidden rounded-full bg-white/10">
-            <div className="h-full w-full rounded-full bg-emerald-300/80" />
+            <div className="h-full w-full rounded-full bg-[oklch(0.89_0.17_171_/_0.85)]" />
           </div>
           {tall ? (
             <div className="grid grid-cols-3 gap-1 pt-1">
@@ -113,14 +113,14 @@ function LogsPreview({ tall }: { tall?: boolean }) {
   return (
     <div
       className={cn(
-        "relative mt-2 overflow-hidden rounded-[0.9rem] border border-white/12 bg-[#140f10]",
+        "relative mt-2 overflow-hidden rounded-[0.9rem] border border-white/12 bg-[#0e0a10]",
         tall ? "h-[7.25rem]" : "h-[4.35rem]"
       )}
     >
       <div className="flex items-center gap-1 border-b border-white/10 px-2 py-1">
-        <span className="size-1.5 rounded-full bg-rose-400/80" />
-        <span className="size-1.5 rounded-full bg-amber-300/70" />
-        <span className="size-1.5 rounded-full bg-emerald-300/60" />
+        <span className="size-1.5 rounded-full bg-[oklch(0.65_0.23_34_/_0.9)]" />
+        <span className="size-1.5 rounded-full bg-[oklch(0.92_0.19_101_/_0.8)]" />
+        <span className="size-1.5 rounded-full bg-[oklch(0.89_0.17_171_/_0.75)]" />
         <span className="ms-1 text-[8px] text-white/45">ci.log</span>
       </div>
       <div className="space-y-0.5 px-2 py-1.5 font-mono">
@@ -129,7 +129,9 @@ function LogsPreview({ tall }: { tall?: boolean }) {
             key={line.text}
             className={cn(
               "truncate text-[8px] leading-relaxed",
-              line.tone === "bad" ? "text-rose-300" : "text-white/55"
+              line.tone === "bad"
+                ? "text-[oklch(0.78_0.18_34)]"
+                : "text-white/55"
             )}
           >
             {line.text}
@@ -148,7 +150,7 @@ function VideoPreview({ tall }: { tall?: boolean }) {
         tall ? "h-[7.25rem]" : "h-[4.35rem]"
       )}
     >
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(160,210,255,0.45),transparent_45%),radial-gradient(circle_at_80%_80%,rgba(40,90,140,0.7),transparent_50%),linear-gradient(145deg,#2a4d6e,#102033)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,oklch(0.67_0.29_341_/_0.45),transparent_45%),radial-gradient(circle_at_80%_80%,oklch(0.55_0.29_299_/_0.55),transparent_50%),linear-gradient(145deg,#2a1030,#0a0610)]" />
       <div className="absolute inset-0 opacity-25 [background-image:linear-gradient(rgba(255,255,255,0.08)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.08)_1px,transparent_1px)] [background-size:12px_12px]" />
 
       <div className="relative flex h-full flex-col justify-between p-2.5">
@@ -157,7 +159,7 @@ function VideoPreview({ tall }: { tall?: boolean }) {
             <p className="text-[9px] font-semibold text-white">agent-preview</p>
             <p className="text-[8px] text-white/55">0:12 · HD</p>
           </div>
-          <span className="rounded bg-black/35 px-1.5 py-0.5 text-[8px] text-white/80">
+          <span className="rounded bg-black/35 px-1.5 py-0.5 text-[8px] text-[oklch(0.78_0.22_341)]">
             REC
           </span>
         </div>
@@ -169,7 +171,7 @@ function VideoPreview({ tall }: { tall?: boolean }) {
           {tall ? (
             <div className="w-full space-y-1">
               <div className="h-1 overflow-hidden rounded-full bg-white/15">
-                <div className="h-full w-2/5 rounded-full bg-white/85" />
+                <div className="h-full w-2/5 rounded-full bg-[oklch(0.67_0.29_341)]" />
               </div>
               <div className="flex justify-between text-[8px] text-white/55">
                 <span>0:05</span>
@@ -227,8 +229,8 @@ function DemoNotification({
   return (
     <article
       className={cn(
-        "absolute inset-x-0 top-0 origin-top overflow-hidden rounded-[1.25rem] border border-white/25 bg-white/28 shadow-[0_14px_36px_-22px_rgba(0,0,0,0.55)] backdrop-blur-2xl transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
-        expanded && isFront && "bg-white/34",
+        "absolute inset-x-0 top-0 origin-top overflow-hidden rounded-[1.25rem] border border-white/20 bg-white/18 shadow-[0_14px_36px_-22px_rgba(0,0,0,0.7)] backdrop-blur-2xl transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
+        expanded && isFront && "bg-white/24",
         !isFront && "pointer-events-none"
       )}
       style={{
@@ -247,7 +249,7 @@ function DemoNotification({
       ) : (
         <div className="px-3 py-2.5">
           <div className="flex items-start gap-2.5">
-            <div className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-[0.7rem] bg-gradient-to-br from-emerald-200 to-teal-800 text-[10px] font-semibold text-white">
+            <div className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-[0.7rem] bg-gradient-to-br from-[oklch(0.78_0.24_341)] to-[oklch(0.45_0.22_320)] text-[10px] font-semibold text-white">
               n
             </div>
             <div className="min-w-0 flex-1">
@@ -360,14 +362,14 @@ export function HeroPhoneDemo({ className }: { className?: string }) {
     <div className={cn("relative mx-auto w-full max-w-[280px]", className)}>
       <div
         aria-hidden
-        className="pointer-events-none absolute -inset-8 -z-10 rounded-[50%] bg-[radial-gradient(circle,rgba(0,0,0,0.22),transparent_70%)] blur-xl"
+        className="pointer-events-none absolute -inset-8 -z-10 rounded-[50%] bg-[radial-gradient(circle,oklch(0.67_0.29_341_/_0.28),transparent_70%)] blur-xl"
       />
 
-      <div className="relative aspect-[9/17.5] w-full overflow-hidden rounded-[2.35rem] border border-foreground/15 bg-[#0c1412] shadow-[0_40px_80px_-28px_rgba(20,40,34,0.55),inset_0_0_0_1px_rgba(255,255,255,0.08)]">
+      <div className="relative aspect-[9/17.5] w-full overflow-hidden rounded-[2.35rem] border border-white/12 bg-black shadow-[0_40px_80px_-28px_rgba(0,0,0,0.85),inset_0_0_0_1px_rgba(255,255,255,0.06)]">
         <div className="absolute inset-[0.35rem] overflow-hidden rounded-[2rem]">
           <div
             aria-hidden
-            className="absolute inset-0 bg-[radial-gradient(ellipse_80%_55%_at_30%_0%,rgba(170,210,190,0.28),transparent_55%),radial-gradient(ellipse_70%_50%_at_90%_20%,rgba(80,130,140,0.35),transparent_50%),linear-gradient(180deg,#243f38_0%,#13221e_45%,#0b1412_100%)]"
+            className="absolute inset-0 bg-[radial-gradient(ellipse_80%_55%_at_30%_0%,oklch(0.67_0.29_341_/_0.32),transparent_55%),radial-gradient(ellipse_70%_50%_at_90%_20%,oklch(0.89_0.17_171_/_0.22),transparent_50%),linear-gradient(180deg,#1a0c18_0%,#0a060c_45%,#000_100%)]"
           />
           <div
             aria-hidden
@@ -378,7 +380,7 @@ export function HeroPhoneDemo({ className }: { className?: string }) {
 
           <div className="relative z-10 flex h-full flex-col px-3.5 pt-12 pb-5 text-white">
             <div className="flex flex-col items-center text-center">
-              <p className="whitespace-nowrap font-heading text-[3.35rem] leading-none font-medium tracking-tight tabular-nums drop-shadow-[0_6px_18px_rgba(0,0,0,0.35)]">
+              <p className="whitespace-nowrap font-heading text-[3.35rem] leading-none font-medium tracking-tight tabular-nums drop-shadow-[0_6px_18px_rgba(0,0,0,0.45)]">
                 {formatClock(now)}
               </p>
               <p className="mt-1.5 text-[11px] font-medium tracking-wide text-white/75">
