@@ -366,7 +366,7 @@ export function LockScreen({
                 {openItem.mediaUrl && openItem.mediaType === "video" ? (
                   <video
                     src={openItem.mediaUrl}
-                    className="w-full rounded-2xl bg-muted"
+                    className="w-full rounded-lg bg-muted"
                     controls
                     playsInline
                     preload="metadata"
@@ -377,7 +377,7 @@ export function LockScreen({
                   <img
                     src={openItem.mediaUrl}
                     alt=""
-                    className="w-full rounded-2xl object-cover"
+                    className="w-full rounded-lg object-cover"
                   />
                 ) : null}
 
@@ -385,7 +385,7 @@ export function LockScreen({
                   <img
                     src={openItem.imageUrl}
                     alt=""
-                    className="w-full rounded-2xl object-cover"
+                    className="w-full rounded-lg object-cover"
                   />
                 ) : null}
               </BottomSheetBody>
@@ -394,7 +394,7 @@ export function LockScreen({
                   <Button
                     nativeButton={false}
                     size="lg"
-                    className="h-13 w-full"
+                    className="h-12 w-full"
                     render={
                       <a href={openItem.url} target="_blank" rel="noreferrer" />
                     }

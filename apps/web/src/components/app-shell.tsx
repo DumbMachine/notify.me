@@ -60,9 +60,9 @@ export function SoftStatus({
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium tracking-wide",
+        "inline-flex items-center gap-1.5 rounded-none bg-secondary px-2.5 py-1 text-xs font-medium tracking-wide text-secondary-foreground",
         tone === "ready" && "bg-primary/12 text-primary",
-        tone === "idle" && "bg-secondary/90 text-secondary-foreground",
+        tone === "idle" && "bg-secondary text-secondary-foreground",
         tone === "warn" && "bg-accent text-accent-foreground"
       )}
     >

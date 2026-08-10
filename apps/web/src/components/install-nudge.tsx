@@ -117,7 +117,7 @@ export function InstallNudge({
         <Button
           type="button"
           size="lg"
-          className="h-13 w-full"
+          className="h-12 w-full"
           onClick={() => void onInstallClick()}
           disabled={installing}
         >
@@ -196,7 +196,7 @@ export function InstallNudge({
               type="button"
               variant="secondary"
               size="lg"
-              className="h-13 w-full"
+              className="h-12 w-full"
               onClick={() => setShowGuide(false)}
             >
               Got it

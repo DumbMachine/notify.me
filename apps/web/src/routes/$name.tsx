@@ -52,7 +52,7 @@ function FieldRow({
       </div>
       <p
         className={cn(
-          "break-all rounded-2xl bg-muted/70 px-3.5 py-3 text-sm leading-relaxed",
+          "break-all rounded-none bg-muted px-3 py-2.5 text-sm leading-relaxed",
           mono && "font-mono text-xs"
         )}
       >
@@ -230,7 +230,7 @@ function DashboardPage() {
         {creds ? (
           <>
             <section className="mt-8 flex flex-1 flex-col items-center justify-center animate-in fade-in zoom-in-95 duration-500 delay-75">
-              <div className="rounded-[1.75rem] border border-border/60 bg-card/90 p-5 shadow-[0_24px_60px_-36px_rgba(36,58,46,0.4)] backdrop-blur-sm">
+              <div className="bg-card p-4 ring-1 ring-foreground/10">
                 <QrCode value={connectUrl} size={200} />
               </div>
               <p className="mt-5 text-center text-sm text-muted-foreground">
@@ -247,7 +247,7 @@ function DashboardPage() {
                 type="button"
                 variant="secondary"
                 size="lg"
-                className="h-13"
+                className="h-11"
                 onClick={() => {
                   setTestResult(null)
                   setSheet("test")
@@ -260,7 +260,7 @@ function DashboardPage() {
                 type="button"
                 variant="outline"
                 size="lg"
-                className="h-13"
+                className="h-11"
                 onClick={() => setSheet("api")}
               >
                 <Code2Icon data-icon="inline-start" />
@@ -273,7 +273,7 @@ function DashboardPage() {
             <Button
               type="button"
               size="lg"
-              className="h-14 w-full"
+              className="h-12 w-full"
               onClick={() => setSheet("unlock")}
             >
               Unlock dashboard
@@ -302,7 +302,7 @@ function DashboardPage() {
                 value={unlockKey}
                 onChange={(e) => setUnlockKey(e.target.value.trim())}
                 placeholder="API key"
-                className="h-13 border-border/80 bg-background/80 text-base"
+                className="h-11 text-base md:text-sm"
                 required
                 minLength={16}
                 autoFocus
@@ -317,7 +317,7 @@ function DashboardPage() {
               <Button
                 type="submit"
                 size="lg"
-                className="h-13 w-full"
+                className="h-11 w-full"
                 disabled={unlockPending || unlockKey.length < 16}
               >
                 {unlockPending ? "Opening…" : "Unlock"}
@@ -347,20 +347,20 @@ function DashboardPage() {
               value={testTitle}
               onChange={(e) => setTestTitle(e.target.value)}
               placeholder="Title"
-              className="h-13 border-border/80 bg-background/80 text-base"
+              className="h-11 text-base md:text-sm"
             />
             <Textarea
               value={testBody}
               onChange={(e) => setTestBody(e.target.value)}
               placeholder="Body"
               rows={3}
-              className="min-h-24 border-border/80 bg-background/80 text-base"
+              className="min-h-24 text-base md:text-sm"
             />
             <Input
               value={testMediaUrl}
               onChange={(e) => setTestMediaUrl(e.target.value.trim())}
               placeholder="Optional https image or video URL"
-              className="h-13 border-border/80 bg-background/80 text-base"
+              className="h-11 text-base md:text-sm"
             />
             {testResult ? (
               <p className="text-sm text-muted-foreground" role="status">
@@ -377,7 +377,7 @@ function DashboardPage() {
             <Button
               type="button"
               size="lg"
-              className="h-13 w-full"
+              className="h-11 w-full"
               onClick={() => void sendTest()}
               disabled={testing || !testTitle.trim()}
             >
@@ -412,7 +412,7 @@ function DashboardPage() {
                     </p>
                     <CopyButton value={curlExample} label="Copy curl" />
                   </div>
-                  <pre className="overflow-x-auto rounded-2xl bg-muted/70 px-3.5 py-3 font-mono text-[11px] leading-relaxed">
+                  <pre className="overflow-x-auto rounded-none bg-muted px-3.5 py-3 font-mono text-[11px] leading-relaxed">
                     {curlExample}
                   </pre>
                 </div>

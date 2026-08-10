@@ -34,7 +34,7 @@ function BottomSheetContent({
   return (
     <DrawerContent
       className={cn(
-        "mx-auto w-full max-w-lg overflow-hidden rounded-t-[2rem]! border-t border-border/70 bg-card text-card-foreground shadow-[0_-24px_60px_-32px_rgba(36,58,46,0.32)] [--drawer-bleed-background:var(--color-card)]",
+        "mx-auto w-full max-w-lg overflow-hidden bg-card text-card-foreground [--drawer-bleed-background:var(--color-card)]",
         className
       )}
       {...props}

@@ -338,7 +338,7 @@ function ConnectPage() {
         <Button
           nativeButton={false}
           size="lg"
-          className="mt-4 h-13"
+          className="mt-4 h-12"
           render={<Link to="/" />}
         >
           <HomeIcon data-icon="inline-start" />
@@ -361,7 +361,7 @@ function ConnectPage() {
         <Button
           nativeButton={false}
           size="lg"
-          className="mt-4 h-13"
+          className="mt-4 h-12"
           render={<Link to="/" />}
         >
           Back to notify.me
@@ -389,7 +389,7 @@ function ConnectPage() {
             <Button
               type="button"
               variant="secondary"
-              className="h-11 rounded-full border border-white/15 bg-white/12 text-white hover:bg-white/18 hover:text-white"
+              className="h-10 bg-white/12 text-white hover:bg-white/18 hover:text-white"
               onClick={() => setSetupOpen(true)}
             >
               {setupPhase === "done" ? (
@@ -428,7 +428,7 @@ function ConnectPage() {
               <Button
                 type="button"
                 size="lg"
-                className="h-13 w-full"
+                className="h-12 w-full"
                 onClick={() => void enableNotifications()}
                 disabled={step === "working"}
               >
@@ -442,7 +442,7 @@ function ConnectPage() {
                 type="button"
                 variant="outline"
                 size="lg"
-                className="h-13 w-full"
+                className="h-12 w-full"
                 onClick={() => void enableNotifications()}
                 disabled={step === "working"}
               >

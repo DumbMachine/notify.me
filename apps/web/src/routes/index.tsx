@@ -68,7 +68,7 @@ function NameField({
         placeholder="alex"
         value={value}
         onChange={(e) => onChange(e.target.value.toLowerCase())}
-        className="h-13 border-border/80 bg-background/80 pe-4 ps-[5.9rem] text-base"
+        className="h-12 ps-[5.9rem] text-base md:text-sm"
         required
         minLength={3}
         maxLength={32}
@@ -188,7 +188,7 @@ function HomePage() {
                     params: { name: deviceName },
                   })
                 }
-                className="flex h-13 items-center justify-between gap-3 rounded-2xl border border-border/70 bg-card/80 px-4 text-start shadow-[0_12px_40px_-28px_rgba(36,58,46,0.45)] backdrop-blur-sm transition-colors hover:bg-card"
+                className="flex h-12 items-center justify-between gap-3 bg-card px-3 text-start ring-1 ring-foreground/10 transition-colors hover:bg-muted"
               >
                 <span className="text-sm text-muted-foreground">Continue as</span>
                 <span className="flex items-center gap-2 font-medium">
@@ -200,7 +200,7 @@ function HomePage() {
             <Button
               type="button"
               size="lg"
-              className="h-14 w-full text-[15px]"
+              className="h-12 w-full text-sm"
               onClick={() => openSheet("claim")}
             >
               <SparklesIcon data-icon="inline-start" />
@@ -210,7 +210,7 @@ function HomePage() {
               type="button"
               variant="ghost"
               size="lg"
-              className="h-12 w-full text-muted-foreground"
+              className="h-10 w-full"
               onClick={() => openSheet("login")}
             >
               <KeyRoundIcon data-icon="inline-start" />
@@ -220,7 +220,7 @@ function HomePage() {
         </section>
 
         <section className="flex flex-1 items-center justify-center py-8 lg:py-10 animate-in fade-in zoom-in-95 duration-700 delay-100">
-          <div className="relative w-full max-w-[22rem] overflow-hidden rounded-[2rem] border border-white/40 p-5 shadow-[0_30px_80px_-36px_rgba(36,58,46,0.45)] sm:max-w-[24rem] sm:rounded-[2.25rem] sm:p-7">
+          <div className="relative w-full max-w-[22rem] overflow-hidden rounded-xl ring-1 ring-foreground/10 p-5 sm:max-w-[24rem] sm:p-7">
             <div aria-hidden className="absolute inset-0">
               <picture>
                 <source srcSet="/hero-bg.avif" type="image/avif" />
@@ -248,7 +248,7 @@ function HomePage() {
                   params: { name: deviceName },
                 })
               }
-              className="flex h-13 items-center justify-between gap-3 rounded-2xl border border-border/70 bg-card/80 px-4 text-start shadow-[0_12px_40px_-28px_rgba(36,58,46,0.45)] backdrop-blur-sm transition-colors hover:bg-card"
+              className="flex h-12 items-center justify-between gap-3 bg-card px-3 text-start ring-1 ring-foreground/10 transition-colors hover:bg-muted"
             >
               <span className="text-sm text-muted-foreground">Continue as</span>
               <span className="flex items-center gap-2 font-medium">
@@ -261,7 +261,7 @@ function HomePage() {
           <Button
             type="button"
             size="lg"
-            className="h-14 w-full text-[15px]"
+            className="h-12 w-full text-sm"
             onClick={() => openSheet("claim")}
           >
             <SparklesIcon data-icon="inline-start" />
@@ -272,7 +272,7 @@ function HomePage() {
             type="button"
             variant="ghost"
             size="lg"
-            className="h-12 w-full text-muted-foreground"
+            className="h-10 w-full"
             onClick={() => openSheet("login")}
           >
             <KeyRoundIcon data-icon="inline-start" />
@@ -311,7 +311,7 @@ function HomePage() {
               <Button
                 type="submit"
                 size="lg"
-                className="h-13 w-full"
+                className="h-12 w-full"
                 disabled={pending || name.trim().length < 3}
               >
                 {pending ? "Claiming…" : "Continue"}
@@ -344,7 +344,7 @@ function HomePage() {
                 autoComplete="current-password"
                 value={apiKey}
                 onChange={(e) => setApiKey(e.target.value.trim())}
-                className="h-13 border-border/80 bg-background/80 text-base"
+                className="h-12 text-base md:text-sm"
                 required
                 minLength={16}
                 placeholder="API key"
@@ -359,7 +359,7 @@ function HomePage() {
               <Button
                 type="submit"
                 size="lg"
-                className="h-13 w-full"
+                className="h-12 w-full"
                 disabled={
                   pending || name.trim().length < 3 || apiKey.length < 16
                 }
