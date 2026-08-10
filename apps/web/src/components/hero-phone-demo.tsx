@@ -180,7 +180,7 @@ export function HeroPhoneDemo({ className }: { className?: string }) {
 
             <div
               className={cn(
-                "relative mt-8 min-h-[9.5rem] transition-opacity duration-500",
+                "relative mt-8 h-[5.6rem] overflow-hidden transition-opacity duration-500",
                 phase === "clear" && "opacity-0"
               )}
             >
