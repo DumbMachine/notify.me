@@ -24,7 +24,8 @@ export const Route = createRootRoute({
         content:
           "Claim a name, connect your phone, and push notifications to it with a simple API.",
       },
-      { name: "theme-color", content: "#0f766e" },
+      { name: "theme-color", content: "#000000" },
+      { name: "color-scheme", content: "dark" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
@@ -57,7 +58,7 @@ function RootComponent() {
 
 function RootDocument({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" dir="ltr">
+    <html lang="en" dir="ltr" className="dark">
       <head>
         <HeadContent />
       </head>
