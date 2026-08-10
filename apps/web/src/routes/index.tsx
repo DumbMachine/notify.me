@@ -174,8 +174,8 @@ function HomePage() {
             From API to lock screen.
           </h1>
           <p className="mt-4 max-w-[28rem] text-[16px] leading-relaxed text-muted-foreground sm:text-[17px]">
-            Claim a name, connect your phone, and push notifications with one
-            call — they collect on a quiet little lock screen.
+            Claim a name, connect your phone, and push rich notifications —
+            screenshots, video, and links land on a quiet little lock screen.
           </p>
 
           <div className="mt-8 hidden flex-col gap-3 sm:max-w-sm lg:flex">
